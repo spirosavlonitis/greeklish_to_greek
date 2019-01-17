@@ -1,9 +1,15 @@
 import React, { Component } from 'react';
-
+import Bar from './Bar'
+import Fields from './Fields'
 
 export default class Home extends Component {
 
 	render() {
-		return (<div>foo</div>)
+		return (
+			<div>
+				<Bar />
+				<Fields />
+			</div>
+		)
 	}
 }
