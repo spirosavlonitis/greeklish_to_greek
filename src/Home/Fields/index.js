@@ -9,36 +9,81 @@ export default class Fields extends Component {
 	constructor(props) {
 		super(props);
 
+		this.lower_chars = [
+	        "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
+	        "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
+	        "ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
+    	];
+
+    	this.atonoi = [ "α", "η", "ε", "ι", "ο", "υ", "ω" ];
+    	this.tonoi =  [ "ά", "ή", "έ", "ί", "ό", "ύ", "ώ" ];
+    	this.toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
+
 		this.state = {
 			cached_words: {},
-			current_char: "",
+			en_input: "",
+			sigma: "",
 			current_word: "",
 			greek_text: ""
-		}
-
-		this.convert_letter = this.convert_letter.bind(this)
+		};
+		this.convert_char = this.convert_char.bind(this);
 	}
 
-	convert_letter(e) {
-		const {current_word, greek_text} = this.state;
-		let current_char = ""
+	isupper = (c) =>
+		(c >= 'A' && c <= 'Z');
+
+	isalpha = (c) =>
+		(this.isupper(c) || (c >= 'a' && c <= 'z'));
+
+	convert_char(e) {
+		const {current_word, greek_text, sigma} = this.state;
+		let c = "";
+		
+	    const chars = {
+	        "a": "α", "b": "β", "c": "ψ", "d": "δ", "e": "ε", "f": "φ",
+	        "g": "γ", "h": "η", "i": "ι", "j": "ξ", "k": "κ", "l": "λ",
+	        "m": "μ", "n": "ν", "o": "ο", "p": "π", "q": "ς", "r": "ρ",
+	        "s": "σ", "t": "τ", "u": "υ", "v": "β", "w": "ω", "x": "χ",
+	        "y": "υ","z": "ζ"
+	    };
+	    const special_chars = {"ps": "ψ", "th": "θ", "ks": "ξ"};
+	    const vowels = ["a", "e", "h", "i", "o", "u", "y", "w"];
 		
 		if (e.KeyCode)
-			current_char = String.fromCharCode(e.KeyCode)
+		 	c = String.fromCharCode(e.KeyCode);
 		else if (e.which)
-			current_char = String.fromCharCode(e.which)
-		console.log(e.which)
+			c = String.fromCharCode(e.which);
+
+		if (this.isalpha(c) === false) {
+			if (c === ' ' && sigma )
+				this.setState({
+					greek_text: greek_text.slice(0,greek_text.length-1)+"ς"+c,
+					sigma: false
+				});
+			else
+				this.setState({
+					greek_text: greek_text+c,
+					sigma: false
+				});
+			return
+		}
+
+		if (this.isupper(c))
+			c = chars[c.toLowerCase()].toUpperCase();
+		else
+			c = chars[c];
+
+
 		this.setState({
-			greek_text: greek_text+current_char
-		})
+			greek_text: greek_text+c,
+			sigma: c === "σ"
+		});
 	}
 
 	get_backspace = (e) => {
 		const {current_word, greek_text} = this.state;
-		if (e.KeyCode != 8 && e.which != 8)
+		if (e.KeyCode !== 8 && e.which !== 8)
 			return
-
-
 		this.setState({
 			greek_text: greek_text.slice(0, greek_text.length-1)
 		})
@@ -56,7 +101,7 @@ export default class Fields extends Component {
 						<div className="col-md-4">
 							<FormGroup 
 								controlId="formControlsTextarea"
-								onKeyPress= {this.convert_letter}
+								onKeyPress= {this.convert_char}
 								onKeyDown=	{this.get_backspace}
 							>
       							<ControlLabel>Greeklish</ControlLabel>
