@@ -29,15 +29,47 @@ export default class Fields extends Component {
 		this.convert_char = this.convert_char.bind(this);
 	}
 
+	handle_special(temp_text) {
+		temp_text = temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
+						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
+						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
+						.replace(/πσ([αεηιοωυ])/g, 'ψ'+'$1')
+						.replace(/τη([αεηιοωυ])/g, 'θ'+'$1')
+						.replace(/κσ([αεηιοωυ])/g, 'ξ'+'$1')
+	
+		return temp_text
+	}
+
+
+
+	handle_non_apla(c) {
+		const {greek_text, sigma} = this.state
+
+		if (c === ' ' && sigma )
+			this.setState({
+				greek_text: greek_text.slice(0,greek_text.length-1)+"ς"+c,
+				sigma: false
+			});
+		else
+			this.setState({
+				greek_text: greek_text+c,
+				sigma: false
+			});
+	}
+
 	isupper = (c) =>
 		(c >= 'A' && c <= 'Z');
 
 	isalpha = (c) =>
-		(this.isupper(c) || (c >= 'a' && c <= 'z'));
+		(this.isupper(c) || (c >= 'a' && c <= 'z'));	
 
 	convert_char(e) {
-		const {current_word, greek_text, sigma} = this.state;
+		const {
+			current_word, greek_text, sigma,
+		} = this.state;
+
 		let c = "";
+		let temp_text;
 		
 	    const chars = {
 	        "a": "α", "b": "β", "c": "ψ", "d": "δ", "e": "ε", "f": "φ",
@@ -55,28 +87,22 @@ export default class Fields extends Component {
 			c = String.fromCharCode(e.which);
 
 		if (this.isalpha(c) === false) {
-			if (c === ' ' && sigma )
-				this.setState({
-					greek_text: greek_text.slice(0,greek_text.length-1)+"ς"+c,
-					sigma: false
-				});
-			else
-				this.setState({
-					greek_text: greek_text+c,
-					sigma: false
-				});
+			this.handle_non_apla(c);
 			return
 		}
 
-		if (this.isupper(c))
+		if (this.isupper(c)){
 			c = chars[c.toLowerCase()].toUpperCase();
-		else
+			temp_text = greek_text+c;
+		}else{
 			c = chars[c];
-
-
+			temp_text = greek_text+c;
+			temp_text = this.handle_special(temp_text);
+		}
+		
 		this.setState({
-			greek_text: greek_text+c,
-			sigma: c === "σ"
+			greek_text: temp_text,
+			sigma: c === "σ",
 		});
 	}
 
@@ -85,7 +111,7 @@ export default class Fields extends Component {
 		if (e.KeyCode !== 8 && e.which !== 8)
 			return
 		this.setState({
-			greek_text: greek_text.slice(0, greek_text.length-1)
+			greek_text: greek_text.length > 0 ?  greek_text.slice(0, greek_text.length-1) : ""
 		})
 	}
 
