@@ -3,21 +3,12 @@ import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import axios from 'axios';
-import greek_capital_words from './Greek_capital.dic';
+import greek_words from './Greek.dic';
 
 export default class Fields extends Component {
 
 	constructor(props) {
 		super(props);
-
-		this.lower_chars = [
-	        "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
-	        "ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
-	        "ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
-    	];
-
-    	this.atonoi = [ "α", "η", "ε", "ι", "ο", "υ", "ω" ];
-    	this.tonoi =  [ "ά", "ή", "έ", "ί", "ό", "ύ", "ώ" ];
 
 		this.state = {
 			cached_words: {},
@@ -36,22 +27,32 @@ export default class Fields extends Component {
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
 	}
 
+	is_greek_upper = c =>
+		(c >= 'Α' && c <= 'Ω')
+
 	tone_word(word, word_list, retry=false) {
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
-		
+		const lower_chars = [
+	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
+	        	"ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
+	        	"ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
+    		];
 		let best_match = "";
 		let dic_word = "";
 		let dif_letters = "";
 		let temp_word = "";
-		
-		for (let i = 0; i < word_list.length; i++) {
+		let i = this.is_greek_upper(word[0])	?  558849 : 0		// choose proper dictionary
+		for ( ; i < word_list.length; i++) {
 			dic_word = word_list[i];
-			if (dic_word[i] !== word[i]){		// check if the letter is a toned letter
+
+			if (dic_word[0] !== word[0]) {
 				if (Object.keys(toned_chars).includes(dic_word[0].toLowerCase()) === false  || toned_chars[dic_word[0].toLowerCase()] !== word[0])	// and if its the toned word letter
-					continue;
-			}else if (dic_word[0] > word[0]) {
-				break;
+				continue;
 			}
+		
+			if (dic_word.charCodeAt(0) > word.charCodeAt(0)) 
+				break;
+			
 			
 			if (dic_word.length !== word.length)			// unequal words
 				continue;
@@ -65,17 +66,26 @@ export default class Fields extends Component {
 					dif_letters += dic_word[j].toLowerCase();
 
 			/* one different character and it's a toned vowel */
-			if (dif_letters.length === 1 && toned_chars[dif_letters] === temp_word)
-				return dic_word;
+			if (dif_letters.length === 1 && toned_chars[dif_letters] === temp_word) {
+				best_match = dic_word;
+				break;
+			}
 		}
-		return word;
+
+		 if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false)   // word was not a capital word
+		 	best_match = this.tone_word(word.toLowerCase(), word_list, true);
+		
+		if (best_match.length === 0) 
+			return word;
+		else
+			return best_match;
 	}
 
 	handle_non_apla(c) {
 		const {greek_text} = this.state
 
 		if (c === ' ' || c === '\n')
-			axios.get(greek_capital_words).then(res => {
+			axios.get(greek_words).then(res => {
 				let text_array = this.handle_special((greek_text+c).replace(/σ /, 'ς ')).split(' ');
 				
 				let word = this.tone_word(text_array[text_array.length-2], res.data.split('\n'));
@@ -83,7 +93,6 @@ export default class Fields extends Component {
 				this.setState({
 					greek_text: (text_array.slice(0,text_array.length-2).join(' ')+' '+word+' ').trimStart()
 				});
-
 			})
 		else 
 			this.setState({
