@@ -45,14 +45,16 @@ export default class Fields extends Component {
 		for ( ; i < word_list.length; i++) {
 			dic_word = word_list[i];
 
-			if (dic_word[0] !== word[0]) {
-				if (Object.keys(toned_chars).includes(dic_word[0].toLowerCase()) === false  || toned_chars[dic_word[0].toLowerCase()] !== word[0])	// and if its the toned word letter
+			if (dic_word.charCodeAt(0) < word.charCodeAt(0)
+				&& (toned_chars[dic_word[0].toLowerCase()] === undefined	// not a vowel
+					|| toned_chars[dic_word[0].toLowerCase()] !== word[0].toLowerCase())	// not the same vowel
+				)
 				continue;
-			}
-		
-			if (dic_word.charCodeAt(0) > word.charCodeAt(0)) 
-				break;
 			
+			if ( Object.values(toned_chars).includes(word[0].toLowerCase()) === false 	// not a vowel
+				&& Object.keys(toned_chars).includes(dic_word[0].toLowerCase()) === false // not a toned vowel
+				&& dic_word.charCodeAt(0) > word.charCodeAt(0))
+				break;			
 			
 			if (dic_word.length !== word.length)			// unequal words
 				continue;
