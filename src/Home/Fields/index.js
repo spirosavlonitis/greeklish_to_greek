@@ -1,8 +1,9 @@
-import React, { Component } from 'react'
+import React, { Component } from 'react';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
-
+import axios from 'axios';
+import greek_capital_words from './Greek_capital.dic';
 
 export default class Fields extends Component {
 
@@ -22,7 +23,6 @@ export default class Fields extends Component {
 		this.state = {
 			cached_words: {},
 			en_input: "",
-			sigma: "",
 			current_word: "",
 			greek_text: ""
 		};
@@ -38,19 +38,31 @@ export default class Fields extends Component {
 						.replace(/κσ([αεηιοωυ])/g, 'ξ'+'$1')
 	}
 
-	handle_non_apla(c) {
-		const {greek_text, sigma} = this.state
+	tone_word(c) {
+		const {current_word, greek_text} = this.state
+		let text_array = this.handle_special((greek_text+c).replace(/σ /, 'ς ')).split(' ');
 
-		if (c === ' ' && sigma )
+	
+		axios.get(greek_capital_words).then(res => {
 			this.setState({
-				greek_text: (greek_text+c).replace(/σ /, 'ς '),
-				sigma: false
+				greek_text: text_array.join(' '),
+				current_word: ''
 			});
-		else
+		})
+	
+	}
+
+	handle_non_apla(c) {
+		const {current_word, greek_text} = this.state;
+
+		if (c === ' ' || c === '\n')
+			this.tone_word(c);
+		else 
 			this.setState({
-				greek_text: greek_text+c,
-				sigma: false
+				current_word: '',
+				greek_text: greek_text+c
 			});
+		
 	}
 
 	isupper = (c) =>
@@ -61,7 +73,7 @@ export default class Fields extends Component {
 
 	convert_char(e) {
 		const {
-			current_word, greek_text, sigma,
+			current_word, greek_text
 		} = this.state;
 		let c = "";
 		
@@ -91,7 +103,7 @@ export default class Fields extends Component {
 		
 		this.setState({
 			greek_text: this.handle_special(greek_text+c),
-			sigma: c === "σ",
+			current_word: this.handle_special(current_word+c)
 		});
 	}
 
@@ -100,7 +112,8 @@ export default class Fields extends Component {
 		if (e.KeyCode !== 8 && e.which !== 8)
 			return
 		this.setState({
-			greek_text: greek_text.length > 0 ?  greek_text.slice(0, greek_text.length-1) : ""
+			greek_text: greek_text.length > 0 ?  greek_text.slice(0, greek_text.length-1) : "",
+			current_word: current_word.length > 0 ?  current_word.slice(0, current_word.length-1) : "",
 		})
 	}
 
