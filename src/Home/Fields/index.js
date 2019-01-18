@@ -30,6 +30,9 @@ export default class Fields extends Component {
 	is_greek_upper = c =>
 		(c >= 'Α' && c <= 'Ω')
 
+	is_greek_alpha = c =>
+		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'))
+
 	tone_word(word, word_list, retry=false) {
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
 		const lower_chars = [
@@ -86,20 +89,39 @@ export default class Fields extends Component {
 	handle_non_apla(c) {
 		const {greek_text} = this.state
 
-		if (c === ' ' || c === '\n')
+		if (c === ' ' || c === '\n' || c === '\r'){
 			axios.get(greek_words).then(res => {
-				let text_array = this.handle_special((greek_text+c).replace(/σ /, 'ς ')).split(' ');
+
+				const regexp = new RegExp("σ"+c);
+				let text_array = this.handle_special((greek_text+c).replace(regexp, "ς ")).split(' ');
 				
-				let word = this.tone_word(text_array[text_array.length-2], res.data.split('\n'));
-				text_array.pop();	// remove nil char
-				text_array.pop();	// remove last word
+				console.log(text_array);
+				
+				let word = "";
+				for (; word.length === 0;)
+					word = text_array.pop();
+
+				let temp_c = '';
+				if (this.is_greek_alpha(word[word.length-1]) === false){
+					temp_c = word[word.length-1];
+					word = word.slice(0, word.length-1);
+				}
+				console.log(temp_c === '\r');
+				
+				word = this.tone_word(word, res.data.split('\n'));
 				text_array.push(word); // add toned word
-				console.log(text_array)
-				this.setState({
-					greek_text: text_array.join(' ').trimStart()+' ',
-				});
+
+				if (c === ' ') 
+					this.setState({
+						greek_text: text_array.join(' ').trimStart()+c,
+					});
+				else
+					this.setState({
+						greek_text: text_array.join(' ').trimStart()+c+' ',
+					});					
+
 			})
-		else 
+		}else 
 			this.setState({
 				greek_text: greek_text+c+' '
 			});
