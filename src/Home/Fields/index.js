@@ -30,24 +30,20 @@ export default class Fields extends Component {
 	}
 
 	handle_special(temp_text) {
-		temp_text = temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
+		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
 						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
 						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
 						.replace(/πσ([αεηιοωυ])/g, 'ψ'+'$1')
 						.replace(/τη([αεηιοωυ])/g, 'θ'+'$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ'+'$1')
-	
-		return temp_text
 	}
-
-
 
 	handle_non_apla(c) {
 		const {greek_text, sigma} = this.state
 
 		if (c === ' ' && sigma )
 			this.setState({
-				greek_text: greek_text.slice(0,greek_text.length-1)+"ς"+c,
+				greek_text: (greek_text+c).replace(/σ /, 'ς '),
 				sigma: false
 			});
 		else
@@ -67,9 +63,7 @@ export default class Fields extends Component {
 		const {
 			current_word, greek_text, sigma,
 		} = this.state;
-
 		let c = "";
-		let temp_text;
 		
 	    const chars = {
 	        "a": "α", "b": "β", "c": "ψ", "d": "δ", "e": "ε", "f": "φ",
@@ -78,7 +72,6 @@ export default class Fields extends Component {
 	        "s": "σ", "t": "τ", "u": "υ", "v": "β", "w": "ω", "x": "χ",
 	        "y": "υ","z": "ζ"
 	    };
-	    const special_chars = {"ps": "ψ", "th": "θ", "ks": "ξ"};
 	    const vowels = ["a", "e", "h", "i", "o", "u", "y", "w"];
 		
 		if (e.KeyCode)
@@ -91,17 +84,13 @@ export default class Fields extends Component {
 			return
 		}
 
-		if (this.isupper(c)){
+		if (this.isupper(c))
 			c = chars[c.toLowerCase()].toUpperCase();
-			temp_text = greek_text+c;
-		}else{
+		else
 			c = chars[c];
-			temp_text = greek_text+c;
-			temp_text = this.handle_special(temp_text);
-		}
 		
 		this.setState({
-			greek_text: temp_text,
+			greek_text: this.handle_special(greek_text+c),
 			sigma: c === "σ",
 		});
 	}
