@@ -54,7 +54,7 @@ export default class Fields extends Component {
 			if ( Object.values(toned_chars).includes(word[0].toLowerCase()) === false 	// not a vowel
 				&& Object.keys(toned_chars).includes(dic_word[0].toLowerCase()) === false // not a toned vowel
 				&& dic_word.charCodeAt(0) > word.charCodeAt(0))
-				break;			
+				break;
 			
 			if (dic_word.length !== word.length)			// unequal words
 				continue;
@@ -91,14 +91,17 @@ export default class Fields extends Component {
 				let text_array = this.handle_special((greek_text+c).replace(/σ /, 'ς ')).split(' ');
 				
 				let word = this.tone_word(text_array[text_array.length-2], res.data.split('\n'));
-				console.log(word)
+				text_array.pop();	// remove nil char
+				text_array.pop();	// remove last word
+				text_array.push(word); // add toned word
+				console.log(text_array)
 				this.setState({
-					greek_text: (text_array.slice(0,text_array.length-2).join(' ')+' '+word+' ').trimStart()
+					greek_text: text_array.join(' ').trimStart()+' ',
 				});
 			})
 		else 
 			this.setState({
-				greek_text: greek_text+c
+				greek_text: greek_text+c+' '
 			});
 	}
 
