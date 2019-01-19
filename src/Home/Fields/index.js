@@ -102,15 +102,15 @@ export default class Fields extends Component {
 				return;
 			}
 
-			const symbols = ['.', ',', '\'', '!', '?'];
-			if (symbols.includes(word[word.length-1])) {		// word ended with a symbol
-				this.setState({
+			const symbols = ['.', ',', '\'', '!', '?'];			
+			if (symbols.includes(word[word.length-1])) {		// symbol from previous entry
+				this.setState({									// usuall followed by space
 					greek_text: greek_text+c,
 				});
 				return;
 			}
 			
-			const sigma_exp = new RegExp("σ$");
+			const sigma_exp = new RegExp("σ$");			// ending sigma
 			word = word.replace(sigma_exp, "ς");
 			word = this.tone_word(word, res.data.split('\n'));
 			
