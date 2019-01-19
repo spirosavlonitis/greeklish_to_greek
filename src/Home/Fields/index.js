@@ -13,6 +13,7 @@ export default class Fields extends Component {
 		this.state = {
 			cached_words: {},
 			en_input: "",
+			greeklish_text: "",
 			greek_text: ""
 		};
 		this.convert_char = this.convert_char.bind(this);
@@ -25,6 +26,7 @@ export default class Fields extends Component {
 						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
 						.replace(/τη([αεηιοωυ])/g, 'θ$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
+						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
 	}
 
 	is_greek_upper = c =>
@@ -89,7 +91,6 @@ export default class Fields extends Component {
 			return best_match;
 	}
 
-	
 
 	handle_non_apla(c) {
 		const {greek_text,cached_words } = this.state;
@@ -129,7 +130,7 @@ export default class Fields extends Component {
 			/* capitalize lines */
 			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
 			let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
-			lines = lines.replace(/[.\!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
 
 			this.setState({		
 				greek_text: lines+c,
@@ -144,7 +145,7 @@ export default class Fields extends Component {
 		(this.isupper(c) || (c >= 'a' && c <= 'z'));	
 
 	convert_char(e) {
-		const {greek_text,} = this.state;
+		const {greek_text, greeklish_text} = this.state;
 		let c = "";
 		
 	    const chars = {
@@ -165,6 +166,7 @@ export default class Fields extends Component {
 			return
 		}
 
+		let en_c = c;
 		if (this.isupper(c))
 			c = chars[c.toLowerCase()].toUpperCase();
 		else
@@ -172,15 +174,16 @@ export default class Fields extends Component {
 		
 		this.setState({
 			greek_text: this.handle_special(greek_text+c),
+			greeklish_text: e.target.value + en_c,
 		});
 	}
 
 	get_backspace = (e) => {
-		const {greek_text} = this.state;
+		const {greek_text, greeklish_text} = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
 			return
 		this.setState({
-			greek_text: greek_text.length > 0 ?  greek_text.slice(0, greek_text.length-1) : "",
+			greek_text: greek_text.slice(0, e.target.value.length),
 		})
 	}
 
@@ -195,7 +198,7 @@ export default class Fields extends Component {
 							<FormGroup 
 								controlId="formControlsTextarea"
 								onKeyPress= {this.convert_char}
-								onKeyDown=	{this.get_backspace}
+								onKeyUp={this.get_backspace}
 							>
       							<ControlLabel>Greeklish</ControlLabel>
       							<FormControl componentClass="textarea" placeholder="textarea" />
