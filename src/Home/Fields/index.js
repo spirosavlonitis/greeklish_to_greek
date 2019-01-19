@@ -13,9 +13,12 @@ export default class Fields extends Component {
 
 		this.state = {
 			cached_words: {},
+			sugg_cached_words: {},
 			raw_input: false,
+			suggest: false,
 			greek_text: ""
 		};
+		
 		this.convert_char = this.convert_char.bind(this);
 	}
 
@@ -194,25 +197,20 @@ export default class Fields extends Component {
 	}
 
 	get_backspace = (e) => {
-		const {greek_text, raw_input} = this.state;
+		const {greek_text, } = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
 			return
-/*		
-		let adjust = greek_text.match(/[θψξ]/ig);		// adjust for two char letters
-		if (adjust === null)
-			adjust = 0;
-		else
-			adjust = adjust.length;
-		
-		this.setState({
-			greek_text: e.target.value.length > 0 ? greek_text.slice(0, e.target.value.length-adjust) : ""
-		})
-*/
+
 		this.setState({
 			greek_text: greek_text.length > 0 ? greek_text.slice(0, greek_text.length-1) : ""
 		})
 	}
 
+	set_suggest = e => {
+		this.setState({
+			suggest: parseInt(e.target.value) !== 0 ?  true : false
+		})
+	}
 	set_input = e => {
 		this.setState({
 			raw_input: parseInt(e.target.value) !== 0 ?  true : false
@@ -220,8 +218,9 @@ export default class Fields extends Component {
 	}
 
 	render() {
-		const {greek_text, raw_input} = this.state;
+		const {greek_text, raw_input, suggest} = this.state;
 
+		console.log(suggest)
 		return (
 			<div className="container">
 				<div className="row">
@@ -257,6 +256,26 @@ export default class Fields extends Component {
 									off
 								</Radio>
 							</FormGroup>
+							<FormGroup >
+								<ControlLabel>Suggestions: &nbsp;</ControlLabel>
+								<Radio 
+									name="suggest_group"
+									checked={suggest === true}
+									onClick={this.set_suggest}
+									value="1"
+									inline>
+									on
+							 	</Radio>
+
+								<Radio 
+									name="suggest_group"
+									checked={suggest === false}
+									onClick={this.set_suggest}
+									value="0"
+									inline>
+									off
+								</Radio>
+							</FormGroup>							
 						</div>
 						<div className="col-md-4">
 							<FormGroup controlId="formControlsTextarea">
