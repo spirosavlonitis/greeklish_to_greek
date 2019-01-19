@@ -89,7 +89,7 @@ export default class Fields extends Component {
 	handle_non_apla(c) {
 		const {greek_text, } = this.state;
 
-		if (c === ' ' || c === '\n' || c === '\r'){
+		if (c === ' ' || c === '\n' || c === '.'){
 			let new_text = greek_text + c;
 			axios.get(greek_words).then(res => {
 				const match_exp = new RegExp(" ([^ ]*)"+c+"$", 'm');
@@ -101,15 +101,14 @@ export default class Fields extends Component {
 				else
 					word = new_text.match(match_exp)[1];
 
-				console.log(word);
 				
-				const sigma_exp = new RegExp("σ"+c);
+				const sigma_exp = new RegExp("σ$");
 				word = word.replace(sigma_exp, "ς");
 				word = this.tone_word(word, res.data.split('\n'));
 
 				this.setState({
 					greek_text: greek_text.replace(/[^\s]*$/m, word)+c,
-				});
+				});					
 			})
 		}else 
 			this.setState({
