@@ -19,16 +19,6 @@ export default class Fields extends Component {
 		this.convert_char = this.convert_char.bind(this);
 	}
 
-	handle_special(temp_text) {
-		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
-						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
-						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
-						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
-						.replace(/τη([αεηιοωυ])/g, 'θ$1')
-						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
-						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
-	}
-
 	is_greek_upper = c =>
 		(c >= 'Α' && c <= 'Ω');
 
@@ -136,6 +126,16 @@ export default class Fields extends Component {
 				greek_text: lines+c,
 			});
 		})
+	}
+
+	handle_special(temp_text) {
+		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
+						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
+						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
+						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
+						.replace(/τη([αεηιοωυ])/g, 'θ$1')
+						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
+						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
 	}
 
 	isupper = (c) =>
