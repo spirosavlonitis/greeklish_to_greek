@@ -90,10 +90,10 @@ export default class Fields extends Component {
 		const {greek_text, } = this.state;
 
 		axios.get(greek_words).then(res => {
-			let lines_array = greek_text.split('\r');
-			
-			let words_array = lines_array[lines_array.length-1].split(' ')
-			let word = words_array[words_array.length-1];
+
+			let lines_array = greek_text.split('\r');	// split text into lines
+			let words_array = lines_array[lines_array.length-1].split(' ')	// get last line array
+			let word = words_array[words_array.length-1];	// get last word
 
 			if (word.length === 0) {		// only new character added
 				this.setState({
@@ -116,13 +116,7 @@ export default class Fields extends Component {
 			
 			words_array[words_array.length-1] = word;			// replace word
 			lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
-			
-			
-			for (let i = 0; i < lines_array.length; i++){
-				if (i === 0)
-					lines_array[i] = lines_array[i].replace(/^(.{1})/, m => m.toUpperCase());
-				break;
-			}
+			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
 
 			this.setState({
 				greek_text: lines_array.join('\r').replace(/[\r.!?] ?.{1}/gm, m => m.toUpperCase())+c,
