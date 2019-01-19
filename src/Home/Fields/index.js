@@ -150,7 +150,7 @@ export default class Fields extends Component {
 		
 	    const chars = {
 	        "a": "α", "b": "β", "c": "ψ", "d": "δ", "e": "ε", "f": "φ",
-	        "g": "γ", "h": "η", "i": "ι", "j": "ξ", "k": "κ", "l": "λ",
+	        "g": "γ", "h": "η", "i": "ι", "k": "κ", "l": "λ", // "j": "ξ" for delete
 	        "m": "μ", "n": "ν", "o": "ο", "p": "π", "q": "ς", "r": "ρ",
 	        "s": "σ", "t": "τ", "u": "υ", "v": "β", "w": "ω", "x": "χ",
 	        "y": "υ","z": "ζ"
@@ -182,8 +182,15 @@ export default class Fields extends Component {
 		const {greek_text, greeklish_text} = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
 			return
+		
+		let adjust = greek_text.match(/[θψξ]/ig);		// adjust for two char letters
+		if (adjust === null)
+			adjust = 0;
+		else
+			adjust = adjust.length;
+		
 		this.setState({
-			greek_text: greek_text.slice(0, e.target.value.length),
+			greek_text: e.target.value.length > 0 ? greek_text.slice(0, e.target.value.length-adjust) : ""
 		})
 	}
 
