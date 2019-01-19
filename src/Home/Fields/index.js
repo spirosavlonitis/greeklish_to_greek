@@ -12,8 +12,7 @@ export default class Fields extends Component {
 
 		this.state = {
 			cached_words: {},
-			en_input: "",
-			greeklish_text: "",
+			raw_input: false,
 			greek_text: ""
 		};
 		this.convert_char = this.convert_char.bind(this);
@@ -72,8 +71,10 @@ export default class Fields extends Component {
 			}
 		}
 
-		 if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false)   // word was not a capital word
+		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false)   // word was not a capital word
 		 	best_match = this.tone_word(word.toLowerCase(), word_list, true);
+		else if (best_match.length === 0 && retry === false && word.match(/θρ/))  // maybe τηρ
+			best_match = this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true);
 		
 		if (best_match.length === 0) 
 			return word;
@@ -83,7 +84,14 @@ export default class Fields extends Component {
 
 
 	handle_non_apla(c) {
-		const {greek_text,cached_words } = this.state;
+		const {greek_text,cached_words, raw_input } = this.state;
+		
+		if (c === '"') {
+			this.setState({
+				raw_input: !raw_input
+			})
+			return
+		}
 
 		axios.get(greek_words).then(res => {
 
@@ -136,6 +144,8 @@ export default class Fields extends Component {
 						.replace(/τη([αεηιοωυ])/g, 'θ$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
 						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
+//						.replace(/ντηρ([αεηιοωυ])/g, 'νθρ$1') // βαθμ
+						.replace(/τηρ([αεηιοωυ])/g, 'θρ$1') // βαθμ
 	}
 
 	isupper = (c) =>
@@ -145,12 +155,12 @@ export default class Fields extends Component {
 		(this.isupper(c) || (c >= 'a' && c <= 'z'));	
 
 	convert_char(e) {
-		const {greek_text, greeklish_text} = this.state;
+		const {greek_text, raw_input} = this.state;
 		let c = "";
 		
 	    const chars = {
 	        "a": "α", "b": "β", "c": "ψ", "d": "δ", "e": "ε", "f": "φ",
-	        "g": "γ", "h": "η", "i": "ι", "k": "κ", "l": "λ", // "j": "ξ" for delete
+	        "g": "γ", "h": "η", "i": "ι", "j": "ξ", "k": "κ", "l": "λ",
 	        "m": "μ", "n": "ν", "o": "ο", "p": "π", "q": "ς", "r": "ρ",
 	        "s": "σ", "t": "τ", "u": "υ", "v": "β", "w": "ω", "x": "χ",
 	        "y": "υ","z": "ζ"
@@ -166,7 +176,13 @@ export default class Fields extends Component {
 			return
 		}
 
-		let en_c = c;
+		if (raw_input) {
+			this.setState({
+				greek_text: greek_text+c
+			})
+			return
+		}
+
 		if (this.isupper(c))
 			c = chars[c.toLowerCase()].toUpperCase();
 		else
@@ -174,15 +190,14 @@ export default class Fields extends Component {
 		
 		this.setState({
 			greek_text: this.handle_special(greek_text+c),
-			greeklish_text: e.target.value + en_c,
 		});
 	}
 
 	get_backspace = (e) => {
-		const {greek_text, greeklish_text} = this.state;
+		const {greek_text, raw_input} = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
 			return
-		
+/*		
 		let adjust = greek_text.match(/[θψξ]/ig);		// adjust for two char letters
 		if (adjust === null)
 			adjust = 0;
@@ -191,6 +206,10 @@ export default class Fields extends Component {
 		
 		this.setState({
 			greek_text: e.target.value.length > 0 ? greek_text.slice(0, e.target.value.length-adjust) : ""
+		})
+*/
+		this.setState({
+			greek_text: greek_text.length > 0 ? greek_text.slice(0, greek_text.length-1) : ""
 		})
 	}
 
@@ -205,7 +224,7 @@ export default class Fields extends Component {
 							<FormGroup 
 								controlId="formControlsTextarea"
 								onKeyPress= {this.convert_char}
-								onKeyUp={this.get_backspace}
+								onKeyDown={this.get_backspace}
 							>
       							<ControlLabel>Greeklish</ControlLabel>
       							<FormControl componentClass="textarea" placeholder="textarea" />
