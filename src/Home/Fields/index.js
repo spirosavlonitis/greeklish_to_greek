@@ -28,10 +28,10 @@ export default class Fields extends Component {
 	}
 
 	is_greek_upper = c =>
-		(c >= 'Α' && c <= 'Ω')
+		(c >= 'Α' && c <= 'Ω');
 
 	is_greek_alpha = c =>
-		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'))
+		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'));
 
 	tone_word(word, word_list, retry=false) {
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
@@ -95,25 +95,37 @@ export default class Fields extends Component {
 			let words_array = lines_array[lines_array.length-1].split(' ')
 			let word = words_array[words_array.length-1];
 
-			if (word.length === 0)
-				return;
-
-			const delimiters = ['.', ',', '\''];
-			if (delimiters.includes(word[word.length-1])) {
+			if (word.length === 0) {		// only new character added
 				this.setState({
 					greek_text: greek_text+c,
-				});				
+				});
 				return;
 			}
-			console.log(word);
+
+			const symbols = ['.', ',', '\'', '!', '?'];
+			if (symbols.includes(word[word.length-1])) {		// word ended with a symbol
+				this.setState({
+					greek_text: greek_text+c,
+				});
+				return;
+			}
+			
 			const sigma_exp = new RegExp("σ$");
 			word = word.replace(sigma_exp, "ς");
 			word = this.tone_word(word, res.data.split('\n'));
 			
-			words_array[words_array.length-1] = word;
-			lines_array[lines_array.length-1] = words_array.join(' ');
+			words_array[words_array.length-1] = word;			// replace word
+			lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
+			
+			
+			for (let i = 0; i < lines_array.length; i++){
+				if (i === 0)
+					lines_array[i] = lines_array[i].replace(/^(.{1})/, m => m.toUpperCase());
+				break;
+			}
+
 			this.setState({
-				greek_text: lines_array.join('\r')+c,
+				greek_text: lines_array.join('\r').replace(/[\r.!?] ?.{1}/gm, m => m.toUpperCase())+c,
 			});
 		})
 	}
