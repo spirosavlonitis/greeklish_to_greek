@@ -87,39 +87,29 @@ export default class Fields extends Component {
 	}
 
 	handle_non_apla(c) {
-		const {greek_text} = this.state
+		const {greek_text, } = this.state;
 
 		if (c === ' ' || c === '\n' || c === '\r'){
+			let new_text = greek_text + c;
 			axios.get(greek_words).then(res => {
-
-				const regexp = new RegExp("σ"+c);
-				let text_array = this.handle_special((greek_text+c).replace(regexp, "ς ")).split(' ');
-				
-				console.log(text_array);
-				
+				const match_exp = new RegExp(" ([^ ]*)"+c+"$", 'm');
+				console.log(new_text.match(match_exp));
 				let word = "";
-				for (; word.length === 0;)
-					word = text_array.pop();
 
-				let temp_c = '';
-				if (this.is_greek_alpha(word[word.length-1]) === false){
-					temp_c = word[word.length-1];
-					word = word.slice(0, word.length-1);
-				}
-				console.log(temp_c === '\r');
-				
-				word = this.tone_word(word, res.data.split('\n'));
-				text_array.push(word); // add toned word
-
-				if (c === ' ') 
-					this.setState({
-						greek_text: text_array.join(' ').trimStart()+c,
-					});
+				if (new_text.match(match_exp) === null)
+					word = greek_text;
 				else
-					this.setState({
-						greek_text: text_array.join(' ').trimStart()+c+' ',
-					});					
+					word = new_text.match(match_exp)[1];
 
+				console.log(word);
+				
+				const sigma_exp = new RegExp("σ"+c);
+				word = word.replace(sigma_exp, "ς");
+				word = this.tone_word(word, res.data.split('\n'));
+
+				this.setState({
+					greek_text: greek_text.replace(/[^\s]*$/m, word)+c,
+				});
 			})
 		}else 
 			this.setState({
