@@ -95,14 +95,23 @@ export default class Fields extends Component {
 			let words_array = lines_array[lines_array.length-1].split(' ')
 			let word = words_array[words_array.length-1];
 
+			if (word.length === 0)
+				return;
 
+			const delimiters = ['.', ',', '\''];
+			if (delimiters.includes(word[word.length-1])) {
+				this.setState({
+					greek_text: greek_text+c,
+				});				
+				return;
+			}
+			console.log(word);
 			const sigma_exp = new RegExp("σ$");
 			word = word.replace(sigma_exp, "ς");
 			word = this.tone_word(word, res.data.split('\n'));
 			
 			words_array[words_array.length-1] = word;
 			lines_array[lines_array.length-1] = words_array.join(' ');
-
 			this.setState({
 				greek_text: lines_array.join('\r')+c,
 			});
