@@ -34,6 +34,8 @@ export default class Fields extends Component {
 		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'));
 
 	tone_word(word, word_list, retry=false) {
+		const {cached_words,} = this.state;
+
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
 		const lower_chars = [
 	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
@@ -48,7 +50,7 @@ export default class Fields extends Component {
 		for ( ; i < word_list.length; i++) {
 			dic_word = word_list[i];
 
-			if (dic_word.charCodeAt(0) < word.charCodeAt(0)
+			if (dic_word.charCodeAt(0) < word.charCodeAt(0)				// skip lower dictionary words
 				&& (toned_chars[dic_word[0].toLowerCase()] === undefined	// not a vowel
 					|| toned_chars[dic_word[0].toLowerCase()] !== word[0].toLowerCase())	// not the same vowel
 				)
@@ -72,6 +74,7 @@ export default class Fields extends Component {
 
 			/* one different character and it's a toned vowel */
 			if (dif_letters.length === 1 && toned_chars[dif_letters] === temp_word) {
+				cached_words[word] = dic_word;
 				best_match = dic_word;
 				break;
 			}
@@ -87,7 +90,7 @@ export default class Fields extends Component {
 	}
 
 	handle_non_apla(c) {
-		const {greek_text, } = this.state;
+		const {greek_text,cached_words } = this.state;
 
 		axios.get(greek_words).then(res => {
 
@@ -109,10 +112,15 @@ export default class Fields extends Component {
 				});
 				return;
 			}
+
+			if (cached_words[word] !== undefined) 	// cached word
+				word = cached_words[word];
+			else {		
+				const sigma_exp = new RegExp("σ$");			// ending sigma
+				word = word.replace(sigma_exp, "ς");
+				word = this.tone_word(word, res.data.split('\n'));
+			}
 			
-			const sigma_exp = new RegExp("σ$");			// ending sigma
-			word = word.replace(sigma_exp, "ς");
-			word = this.tone_word(word, res.data.split('\n'));
 			
 			words_array[words_array.length-1] = word;			// replace word
 			lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
