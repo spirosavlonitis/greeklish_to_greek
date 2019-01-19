@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
+import Radio from 'react-bootstrap/lib/Radio';
 import axios from 'axios';
 import greek_words from './Greek.dic';
 
@@ -81,7 +82,6 @@ export default class Fields extends Component {
 		else
 			return best_match;
 	}
-
 
 	handle_non_apla(c) {
 		const {greek_text,cached_words, raw_input } = this.state;
@@ -213,8 +213,14 @@ export default class Fields extends Component {
 		})
 	}
 
+	set_input = e => {
+		this.setState({
+			raw_input: parseInt(e.target.value) !== 0 ?  true : false
+		})
+	}
+
 	render() {
-		const {greek_text} = this.state;
+		const {greek_text, raw_input} = this.state;
 
 		return (
 			<div className="container">
@@ -231,7 +237,26 @@ export default class Fields extends Component {
 							</FormGroup>
 						</div>
 						<div className="col-md-4">
-							options
+							<FormGroup >
+								<ControlLabel>Raw Input: &nbsp;</ControlLabel>
+								<Radio 
+									name="raw_input_group" 
+									checked={raw_input === true}
+									onClick={this.set_input}
+									value="1"
+									inline>
+									on
+							 	</Radio>
+
+								<Radio 
+									name="raw_input_group" 
+									checked={raw_input === false}
+									onClick={this.set_input}
+									value="0"
+									inline>
+									off
+								</Radio>
+							</FormGroup>
 						</div>
 						<div className="col-md-4">
 							<FormGroup controlId="formControlsTextarea">
