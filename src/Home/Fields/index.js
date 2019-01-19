@@ -89,6 +89,8 @@ export default class Fields extends Component {
 			return best_match;
 	}
 
+	
+
 	handle_non_apla(c) {
 		const {greek_text,cached_words } = this.state;
 
@@ -121,13 +123,16 @@ export default class Fields extends Component {
 				word = this.tone_word(word, res.data.split('\n'));
 			}
 			
-			
 			words_array[words_array.length-1] = word;			// replace word
 			lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
-			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
 
-			this.setState({
-				greek_text: lines_array.join('\r').replace(/[\r.!?] ?.{1}/gm, m => m.toUpperCase())+c,
+			/* capitalize lines */
+			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
+			let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
+			lines = lines.replace(/[.\!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+
+			this.setState({		
+				greek_text: lines+c,
 			});
 		})
 	}
