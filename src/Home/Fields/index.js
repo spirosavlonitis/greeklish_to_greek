@@ -89,31 +89,24 @@ export default class Fields extends Component {
 	handle_non_apla(c) {
 		const {greek_text, } = this.state;
 
-		if (c === ' ' || c === '\n' || c === '.'){
-			let new_text = greek_text + c;
-			axios.get(greek_words).then(res => {
-				const match_exp = new RegExp(" ([^ ]*)"+c+"$", 'm');
-				console.log(new_text.match(match_exp));
-				let word = "";
+		axios.get(greek_words).then(res => {
+			let lines_array = greek_text.split('\r');
+			
+			let words_array = lines_array[lines_array.length-1].split(' ')
+			let word = words_array[words_array.length-1];
 
-				if (new_text.match(match_exp) === null)
-					word = greek_text;
-				else
-					word = new_text.match(match_exp)[1];
 
-				
-				const sigma_exp = new RegExp("σ$");
-				word = word.replace(sigma_exp, "ς");
-				word = this.tone_word(word, res.data.split('\n'));
+			const sigma_exp = new RegExp("σ$");
+			word = word.replace(sigma_exp, "ς");
+			word = this.tone_word(word, res.data.split('\n'));
+			
+			words_array[words_array.length-1] = word;
+			lines_array[lines_array.length-1] = words_array.join(' ');
 
-				this.setState({
-					greek_text: greek_text.replace(/[^\s]*$/m, word)+c,
-				});					
-			})
-		}else 
 			this.setState({
-				greek_text: greek_text+c+' '
+				greek_text: lines_array.join('\r')+c,
 			});
+		})
 	}
 
 	isupper = (c) =>
