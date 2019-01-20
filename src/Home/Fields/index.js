@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import TopBarProgress from "react-topbar-progress-indicator";
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
@@ -6,12 +7,22 @@ import Radio from 'react-bootstrap/lib/Radio';
 import axios from 'axios';
 import greek_words from './Greek.dic';
 
+TopBarProgress.config({
+  barColors: {
+    "0": "#f00",
+    "1.0": "#ff5050",
+  },
+  shadowBlur: 5,
+});
+
+
 export default class Fields extends Component {
 
 	constructor(props) {
 		super(props);
 
 		this.state = {
+			isloading: true,
 			cached_words: {},
 			suggest_cached_words: {},
 			raw_input: false,
@@ -224,78 +235,86 @@ export default class Fields extends Component {
 		})
 	}
 
+	componentDidMount() {
+		this.setState({
+			isloading: false
+		})
+	}
+
 	render() {
-		const {greek_text, raw_input, suggest} = this.state;
-
+		const {greek_text, raw_input, suggest, isloading} = this.state;
 		return (
-			<div className="container">
-				<div className="row">
-					<div className="col-md-12">
-						<div className="col-md-4">
-							<FormGroup 
-								controlId="formControlsTextarea"
-								onKeyPress= {this.convert_char}
-								onKeyDown={this.get_backspace}
-							>
-      							<ControlLabel>Greeklish</ControlLabel>
-      							<FormControl componentClass="textarea" placeholder="textarea" />
-							</FormGroup>
-						</div>
-						<div className="col-md-4">
-							<FormGroup >
-								<ControlLabel>Raw Input: &nbsp;</ControlLabel>
-								<Radio 
-									name="raw_input_group" 
-									checked={raw_input === true}
-									onClick={this.set_input}
-									value="1"
-									inline>
-									on
-							 	</Radio>
+			<div>
+				{ isloading && <TopBarProgress />}
+				<div className="container">
+					<div className="row">
+						<div className="col-md-12">
+							<div className="col-md-4">
+								<FormGroup 
+									controlId="formControlsTextarea"
+									onKeyPress= {this.convert_char}
+									onKeyDown={this.get_backspace}
+								>
+	      							<ControlLabel>Greeklish</ControlLabel>
+	      							<FormControl componentClass="textarea" placeholder="textarea" />
+								</FormGroup>
+							</div>
+							<div className="col-md-4">
+								<FormGroup >
+									<ControlLabel>Raw Input: &nbsp;</ControlLabel>
+									<Radio 
+										name="raw_input_group" 
+										checked={raw_input === true}
+										onClick={this.set_input}
+										value="1"
+										inline>
+										on
+								 	</Radio>
 
-								<Radio 
-									name="raw_input_group" 
-									checked={raw_input === false}
-									onClick={this.set_input}
-									value="0"
-									inline>
-									off
-								</Radio>
-							</FormGroup>
-							<FormGroup >
-								<ControlLabel>Suggestions: &nbsp;</ControlLabel>
-								<Radio 
-									name="suggest_group"
-									checked={suggest === true}
-									onClick={this.set_suggest}
-									value="1"
-									inline>
-									on
-							 	</Radio>
+									<Radio 
+										name="raw_input_group" 
+										checked={raw_input === false}
+										onClick={this.set_input}
+										value="0"
+										inline>
+										off
+									</Radio>
+								</FormGroup>
+								<FormGroup >
+									<ControlLabel>Suggestions: &nbsp;</ControlLabel>
+									<Radio 
+										name="suggest_group"
+										checked={suggest === true}
+										onClick={this.set_suggest}
+										value="1"
+										inline>
+										on
+								 	</Radio>
 
-								<Radio 
-									name="suggest_group"
-									checked={suggest === false}
-									onClick={this.set_suggest}
-									value="0"
-									inline>
-									off
-								</Radio>
-							</FormGroup>							
-						</div>
-						<div className="col-md-4">
-							<FormGroup controlId="formControlsTextarea">
-      							<ControlLabel>Greek</ControlLabel>
-      							<FormControl
-      							 componentClass="textarea" 
-      							 placeholder="textarea"
-      							 value={greek_text}
-      							/>
-							</FormGroup>
+									<Radio 
+										name="suggest_group"
+										checked={suggest === false}
+										onClick={this.set_suggest}
+										value="0"
+										inline>
+										off
+									</Radio>
+								</FormGroup>							
+							</div>
+							<div className="col-md-4">
+								<FormGroup controlId="formControlsTextarea">
+	      							<ControlLabel>Greek</ControlLabel>
+	      							<FormControl
+	      							 componentClass="textarea" 
+	      							 placeholder="textarea"
+	      							 value={greek_text}
+	      							/>
+								</FormGroup>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
+		</div>
 		)
 	}
 }
