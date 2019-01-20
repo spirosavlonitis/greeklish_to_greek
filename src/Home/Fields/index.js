@@ -88,11 +88,15 @@ export default class Fields extends Component {
 			}
 		}
 
-		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false)   // word was not a capital word
+		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false){   // word was not a capital word
 		 	best_match = this.tone_word(word.toLowerCase(), word_list, true);
-		else if (best_match.length === 0 && retry === false && word.match(/θρ/))  // maybe τηρ
+		 	if (suggest === false)
+		 		return best_match;
+		}else if (best_match.length === 0 && retry === false && word.match(/θρ/)){  // maybe τηρ
 			best_match = this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true);
-		
+		 	if (suggest === false)
+		 		return best_match;		
+		}
 
 		if (best_match.length === 0) 		// no match found return original word
 			return word;
