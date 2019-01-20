@@ -13,12 +13,12 @@ export default class Fields extends Component {
 
 		this.state = {
 			cached_words: {},
-			sugg_cached_words: {},
+			suggest_cached_words: {},
 			raw_input: false,
 			suggest: false,
 			greek_text: ""
 		};
-		
+
 		this.convert_char = this.convert_char.bind(this);
 	}
 
@@ -29,7 +29,7 @@ export default class Fields extends Component {
 		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'));
 
 	tone_word(word, word_list, retry=false) {
-		const {cached_words,} = this.state;
+		const {cached_words, suggest, suggest_cached_words} = this.state;
 
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
 		const lower_chars = [
@@ -37,7 +37,7 @@ export default class Fields extends Component {
 	        	"ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
 	        	"ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
     		];
-		let best_match = "";
+		let best_match = [];
 		let dic_word = "";
 		let dif_letters = "";
 		let temp_word = "";
@@ -69,9 +69,11 @@ export default class Fields extends Component {
 
 			/* one different character and it's a toned vowel */
 			if (dif_letters.length === 1 && toned_chars[dif_letters] === temp_word) {
-				cached_words[word] = dic_word;
-				best_match = dic_word;
-				break;
+				if (suggest === false) {
+					cached_words[word] = dic_word;
+					return dic_word;
+				}else 
+					best_match.push(dic_word);
 			}
 		}
 
@@ -80,14 +82,17 @@ export default class Fields extends Component {
 		else if (best_match.length === 0 && retry === false && word.match(/θρ/))  // maybe τηρ
 			best_match = this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true);
 		
-		if (best_match.length === 0) 
+
+		if (best_match.length === 0) 		// no match found return original word
 			return word;
-		else
-			return best_match;
+		else {
+			suggest_cached_words[word] = best_match.join('/');
+			return best_match.join('/');	// return word and any suggestions
+		}
 	}
 
 	handle_non_apla(c) {
-		const {greek_text,cached_words, raw_input } = this.state;
+		const {greek_text, cached_words, suggest, suggest_cached_words, raw_input } = this.state;
 		
 		if (c === '"') {
 			this.setState({
@@ -117,8 +122,10 @@ export default class Fields extends Component {
 				return;
 			}
 
-			if (cached_words[word] !== undefined) 	// cached word
+			if (cached_words[word] !== undefined && suggest === false) {	// cached word
 				word = cached_words[word];
+			}else if (suggest_cached_words[word] !== undefined && suggest)
+				word = suggest_cached_words[word];
 			else {		
 				const sigma_exp = new RegExp("σ$");			// ending sigma
 				word = word.replace(sigma_exp, "ς");
@@ -220,7 +227,6 @@ export default class Fields extends Component {
 	render() {
 		const {greek_text, raw_input, suggest} = this.state;
 
-		console.log(suggest)
 		return (
 			<div className="container">
 				<div className="row">
