@@ -33,11 +33,40 @@ export default class Fields extends Component {
 		this.convert_char = this.convert_char.bind(this);
 	}
 
+	isupper = (c) =>
+		(c >= 'A' && c <= 'Z');
+
+	isalpha = (c) =>
+		(this.isupper(c) || (c >= 'a' && c <= 'z'));
+
 	is_greek_upper = c =>
 		(c >= 'Α' && c <= 'Ω');
 
 	is_greek_alpha = c =>
 		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'));
+
+	samecase_macthes(lines) {
+		const lower_chars = [
+	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
+	        	"ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
+	        	"ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
+    		];
+
+    	lines = lines.split('\r');					// split into line array
+		let line = lines[lines.length-1].split(' ');	// last line array
+		let word = line[line.length-1];					// last word of last line
+    													/* for raw input */
+    	if (lower_chars.includes(word[0]) === false && this.isalpha(word[0]) === false) {
+    		word = word.split('/');
+    		word = word.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
+    	}
+    	/* reasmble the lines */
+   		line[line.length-1] = word;		
+   		lines[lines.length-1] = line.join(' ');
+   		lines = lines.join('\r');			
+    	
+    	return lines;
+	}
 
 	tone_word(word, word_list, retry=false) {
 		const {cached_words, suggest, suggest_cached_words} = this.state;
@@ -89,18 +118,23 @@ export default class Fields extends Component {
 		}
 
 		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false){   // word was not a capital word
-		 	best_match = this.tone_word(word.toLowerCase(), word_list, true);
+		 	best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+		 	best_match = best_match.flat();		// flatten two dimention array created from array returned
 		 	if (suggest === false)
-		 		return best_match;
+		 		return best_match[0];
 		}else if (best_match.length === 0 && retry === false && word.match(/θρ/)){  // maybe τηρ
-			best_match = this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true);
+			best_match.push(this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true));
+		 	best_match = best_match.flat();
 		 	if (suggest === false)
-		 		return best_match;		
+		 		return best_match[0];		
 		}
 
 		if (best_match.length === 0) 		// no match found return original word
 			return word;
 		else {
+			if (retry)		// return best match array
+				return best_match;
+			
 			suggest_cached_words[word] = best_match.join('/');
 			return best_match.join('/');	// return word and any suggestions
 		}
@@ -137,16 +171,16 @@ export default class Fields extends Component {
 				return;
 			}
 
+
 			if (cached_words[word] !== undefined && suggest === false) {	// cached word
 				word = cached_words[word];
-			}else if (suggest_cached_words[word] !== undefined && suggest)
+			}else if (suggest_cached_words[word] !== undefined && suggest){
 				word = suggest_cached_words[word];
-			else {		
+			}else {		
 				const sigma_exp = new RegExp("σ$");			// ending sigma
 				word = word.replace(sigma_exp, "ς");
 				word = this.tone_word(word, res.data.split('\n'));
 			}
-			
 			words_array[words_array.length-1] = word;			// replace word
 			lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
 
@@ -154,7 +188,9 @@ export default class Fields extends Component {
 			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
 			let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
 			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
-
+			if (suggest){
+				 lines = this.samecase_macthes(lines);
+			}
 			this.setState({		
 				greek_text: lines+c,
 			});
@@ -172,12 +208,6 @@ export default class Fields extends Component {
 //						.replace(/ντηρ([αεηιοωυ])/g, 'νθρ$1') // βαθμ
 						.replace(/τηρ([αεηιοωυ])/g, 'θρ$1') // βαθμ
 	}
-
-	isupper = (c) =>
-		(c >= 'A' && c <= 'Z');
-
-	isalpha = (c) =>
-		(this.isupper(c) || (c >= 'a' && c <= 'z'));	
 
 	convert_char(e) {
 		const {greek_text, raw_input} = this.state;
@@ -218,6 +248,12 @@ export default class Fields extends Component {
 		});
 	}
 
+	greek_text_change = (e) => {
+		this.setState({
+			greek_text: e.target.value
+		})
+	}
+
 	get_backspace = (e) => {
 		const {greek_text, } = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
@@ -247,6 +283,7 @@ export default class Fields extends Component {
 
 	render() {
 		const {greek_text, raw_input, suggest, isloading} = this.state;
+		
 		return (
 			<div>
 				{ isloading && <TopBarProgress />}
@@ -312,6 +349,7 @@ export default class Fields extends Component {
 	      							 componentClass="textarea" 
 	      							 placeholder="textarea"
 	      							 value={greek_text}
+	      							 onChange={this.greek_text_change}
 	      							/>
 								</FormGroup>
 							</div>
