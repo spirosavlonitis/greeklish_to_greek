@@ -203,7 +203,7 @@ export default class Fields extends Component {
 						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
 						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
 						.replace(/τη([αεηιοωυ])/g, 'θ$1')
-						.replace(/8([αεηιοωυ])/g, 'θ$1')
+						.replace(/8([αεηιοωυρ])/g, 'θ$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
 						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
 //						.replace(/ντηρ([αεηιοωυ])/g, 'νθρ$1') // βαθμ
