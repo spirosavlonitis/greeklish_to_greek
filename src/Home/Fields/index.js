@@ -171,7 +171,6 @@ export default class Fields extends Component {
 				return;
 			}
 
-
 			if (cached_words[word] !== undefined && suggest === false) {	// cached word
 				word = cached_words[word];
 			}else if (suggest_cached_words[word] !== undefined && suggest){
@@ -297,7 +296,10 @@ export default class Fields extends Component {
 									onKeyDown={this.get_backspace}
 								>
 	      							<ControlLabel>Greeklish</ControlLabel>
-	      							<FormControl componentClass="textarea" placeholder="textarea" />
+	      							<FormControl 
+	      								componentClass="textarea" 
+	      								placeholder="" 
+	      							/>
 								</FormGroup>
 							</div>
 							<div className="col-md-4">
@@ -347,7 +349,7 @@ export default class Fields extends Component {
 	      							<ControlLabel>Greek</ControlLabel>
 	      							<FormControl
 	      							 componentClass="textarea" 
-	      							 placeholder="textarea"
+	      							 placeholder=""
 	      							 value={greek_text}
 	      							 onChange={this.greek_text_change}
 	      							/>
