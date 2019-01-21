@@ -202,12 +202,12 @@ export default class Fields extends Component {
 						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
 						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
 						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
-						.replace(/τη([αεηιοωυ])/g, 'θ$1')
+						.replace(/τη([αεηιοωυρ])/g, 'θ$1')
 						.replace(/8([αεηιοωυρ])/g, 'θ$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
 						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
 //						.replace(/ντηρ([αεηιοωυ])/g, 'νθρ$1') // βαθμ
-						.replace(/τηρ([αεηιοωυ])/g, 'θρ$1') // βαθμ
+//						.replace(/τηρ([αεηιοωυ])/g, 'θρ$1') // βαθμ
 	}
 
 	convert_char(e) {
