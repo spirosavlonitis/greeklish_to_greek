@@ -185,7 +185,7 @@ export default class Fields extends Component {
 
 			/* capitalize lines */
 			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
-			lines_array = lines_array.map( line => line.trim());
+			lines_array = lines_array.map( line => line.trim()); 
 			let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
 			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
 			if (suggest){
