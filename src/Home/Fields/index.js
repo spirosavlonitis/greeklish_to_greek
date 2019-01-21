@@ -132,10 +132,12 @@ export default class Fields extends Component {
 		if (best_match.length === 0) 		// no match found return original word
 			return word;
 		else {
-			if (retry)		// return best match array
+			if (retry)		// return best match in array form
 				return best_match;
 			
-			suggest_cached_words[word] = best_match.join('/');
+			if (best_match !== word)		// add only if  a correct word is found
+				suggest_cached_words[word] = best_match.join('/');
+			
 			return best_match.join('/');	// return word and any suggestions
 		}
 	}
@@ -171,7 +173,7 @@ export default class Fields extends Component {
 				return;
 			}
 
-			if (cached_words[word] !== undefined && suggest === false) {	// cached word
+			if (cached_words[word] !== undefined && suggest === false) {	
 				word = cached_words[word];
 			}else if (suggest_cached_words[word] !== undefined && suggest){
 				word = suggest_cached_words[word];
