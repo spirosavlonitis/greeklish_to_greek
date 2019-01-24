@@ -23,6 +23,7 @@ export default class Fields extends Component {
 
 		this.state = {
 			isloading: true,
+			first_input: true,
 			cached_words: {},
 			suggest_cached_words: {},
 			raw_input: false,
@@ -143,7 +144,7 @@ export default class Fields extends Component {
 	}
 
 	handle_non_apla(c) {
-		const {greek_text, cached_words, suggest, suggest_cached_words, raw_input } = this.state;
+		const {greek_text, cached_words, suggest, suggest_cached_words, raw_input, first_input } = this.state;
 		
 		if (c === '"') {
 			this.setState({
@@ -151,7 +152,10 @@ export default class Fields extends Component {
 			})
 			return
 		}
-
+		if (first_input)
+			this.setState({
+				isloading:true
+			})
 		axios.get(greek_words).then(res => {
 
 			let lines_array = greek_text.split('\r');	// split text into lines
@@ -193,9 +197,17 @@ export default class Fields extends Component {
 			if (suggest){
 				 lines = this.samecase_macthes(lines);
 			}
-			this.setState({		
-				greek_text: lines+c,
-			});
+
+			if (first_input)			// use the loading bar for the first conversion
+				this.setState({		
+					greek_text: lines+c,
+					first_input: false,
+					isloading: false,
+				});
+			else
+				this.setState({		
+					greek_text: lines+c,
+				});
 		})
 	}
 
@@ -229,7 +241,7 @@ export default class Fields extends Component {
 		else if (e.which)
 			c = String.fromCharCode(e.which);
 
-		if (this.isalpha(c) === false) {
+		if (this.isalpha(c) === false) {			// tone word if space
 			this.handle_non_apla(c);
 			return
 		}
