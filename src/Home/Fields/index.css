@@ -57,3 +57,13 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.switchText {
+  color: grey;
+  padding: 10px;
+}
+
+.switchLabel {
+  color: grey;
+  font-size: 20px;
+}

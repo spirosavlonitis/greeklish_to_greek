@@ -351,12 +351,12 @@ export default class Fields extends Component {
 							</div>
 							<div className="col-md-4" align="center">
 								<FormGroup >
-									<ControlLabel>Raw Input: &nbsp;</ControlLabel>
+									<ControlLabel className="switchLabel" >Raw Input &nbsp;</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
 									  <span classssName="slider"></span>
 									</label>
-
+									<b className="switchText" >OFF</b>
 									<label className="switch">
 									  <input type="checkbox" 
 										onClick={this.set_input}
@@ -364,13 +364,15 @@ export default class Fields extends Component {
 										/>
 									  <span className="slider round"></span>
 									</label>
+									<b className="switchText" >ON</b>
 								</FormGroup>
 								<FormGroup >
-									<ControlLabel>Suggestions: &nbsp;</ControlLabel>
+									<ControlLabel className="switchLabel" >Suggestions</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
 									  <span classssName="slider"></span>
 									</label>
+									<b className="switchText" >OFF</b>
 									<label className="switch">
 									  <input type="checkbox" 
 										onClick={this.set_suggest}
@@ -378,6 +380,7 @@ export default class Fields extends Component {
 									   />
 									  <span className="slider round"></span>
 									</label>
+									<b className="switchText" >ON</b>
 								</FormGroup>
 							</div>
 							<div className="col-md-4">
