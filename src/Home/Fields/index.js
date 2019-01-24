@@ -124,15 +124,15 @@ export default class Fields extends Component {
 		 	if (word.match(/(Τ|τ)ηρ/)){
 		 		best_match.push(this.tone_word(word.replace(/(Τ|τ)ηρ/, 'θρ').toLowerCase(), word_list, true));
 		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
-			 	best_match = best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
 			 	if (suggest === false){
+			 		best_match = best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
 			 		return best_match;
 			 	}
 		 	}else if(word.match(/(Θ|θ)ρ/)){
 		 		best_match.push(this.tone_word(word.replace(/(Θ|θ)ρ/, 'τηρ').toLowerCase(), word_list, true));
 		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
-			 	best_match = best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
 			 	if (suggest === false){
+			 		best_match = best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
 			 		return best_match;
 			 	}
 		 	}else
