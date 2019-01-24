@@ -120,7 +120,23 @@ export default class Fields extends Component {
 		}
 
 		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false){   // word was not a capital word
-		 	best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+
+		 	if (word.match(/Τηρ/)){
+		 		best_match.push(this.tone_word(word.replace(/Τηρ/, 'θρ'), word_list, true));
+		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+			 	if (suggest === false){
+			 		best_match = best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
+			 		return best_match;
+			 	}
+		 	}else if(word.match(/Θρ/)){
+		 		best_match.push(this.tone_word(word.replace(/Θρ/, 'τηρ'), word_list, true));
+		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+			 	if (suggest === false){
+			 		best_match = best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
+			 		return best_match;
+			 	}
+		 	}else
+		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
 		 	best_match = best_match.flat();		// flatten two dimention array created from array returned
 		 	if (suggest === false)
 		 		return best_match[0];
