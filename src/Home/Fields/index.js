@@ -24,8 +24,9 @@ export default class Fields extends Component {
 		this.state = {
 			isloading: true,
 			first_input: true,
-			cached_words: {},
-			suggest_cached_words: {},
+			cached_list: [],
+			seen_words: {},
+			suggest_seen_words: {},
 			raw_input: false,
 			suggest: false,
 			greek_text: ""
@@ -70,7 +71,7 @@ export default class Fields extends Component {
 	}
 
 	tone_word(word, word_list, retry=false) {
-		const {cached_words, suggest, suggest_cached_words} = this.state;
+		const {seen_words, suggest, suggest_seen_words} = this.state;
 
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
 		const lower_chars = [
@@ -111,7 +112,7 @@ export default class Fields extends Component {
 			/* one different character and it's a toned vowel */
 			if (dif_letters.length === 1 && toned_chars[dif_letters] === temp_word) {
 				if (suggest === false) {
-					cached_words[word] = dic_word;
+					seen_words[word] = dic_word;
 					return dic_word;
 				}else 
 					best_match.push(dic_word);
@@ -137,14 +138,74 @@ export default class Fields extends Component {
 				return best_match;
 			
 			if (best_match !== word)		// add only if  a correct word is found
-				suggest_cached_words[word] = best_match.join('/');
+				suggest_seen_words[word] = best_match.join('/');
 			
 			return best_match.join('/');	// return word and any suggestions
 		}
 	}
 
+	convert(c, word_list=[]) {
+		const {greek_text, seen_words, suggest, suggest_seen_words, first_input, cached_list } = this.state;
+
+		if (word_list.length === 0)
+			word_list = cached_list
+		
+		let lines_array = greek_text.split('\r');	// split text into lines
+		let words_array = lines_array[lines_array.length-1].split(' ')	// get last line array
+		let word = words_array[words_array.length-1];	// get last word
+
+		if (word.length === 0) {		// only new character added
+			this.setState({
+				greek_text: greek_text+c,
+			});
+			return;
+		}
+
+		const symbols = ['.', ',', '\'', '!', '?'];			
+		if (symbols.includes(word[word.length-1])) {		// symbol from previous entry
+			this.setState({									// usuall followed by space
+				greek_text: greek_text+c,
+			});
+			return;
+		}
+
+		if (seen_words[word] !== undefined && suggest === false) {	
+			word = seen_words[word];
+		}else if (suggest_seen_words[word] !== undefined && suggest){
+			word = suggest_seen_words[word];
+		}else {		
+			const sigma_exp = new RegExp("σ$");			// ending sigma
+			word = word.replace(sigma_exp, "ς");
+			word = this.tone_word(word, word_list);
+		}
+		words_array[words_array.length-1] = word;			// replace word
+		lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
+
+		/* capitalize lines */
+		lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
+		lines_array = lines_array.map( line => line.trim()); 
+		let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
+		lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+		if (suggest){
+			 lines = this.samecase_macthes(lines);
+		}
+
+		if (first_input)			// use the loading bar for the first conversion
+			this.setState({		
+				first_input: false,
+				isloading: false,
+				cached_list: word_list,
+				greek_text: lines+c
+			});
+		else
+			this.setState({		
+				greek_text: lines+c,
+			});
+
+	}
+
 	handle_non_apla(c) {
-		const {greek_text, cached_words, suggest, suggest_cached_words, raw_input, first_input } = this.state;
+		const {raw_input, first_input, cached_list } = this.state;
 		
 		if (c === '"') {
 			this.setState({
@@ -152,63 +213,18 @@ export default class Fields extends Component {
 			})
 			return
 		}
+
 		if (first_input)
 			this.setState({
 				isloading:true
 			})
-		axios.get(greek_words).then(res => {
 
-			let lines_array = greek_text.split('\r');	// split text into lines
-			let words_array = lines_array[lines_array.length-1].split(' ')	// get last line array
-			let word = words_array[words_array.length-1];	// get last word
-
-			if (word.length === 0) {		// only new character added
-				this.setState({
-					greek_text: greek_text+c,
-				});
-				return;
-			}
-
-			const symbols = ['.', ',', '\'', '!', '?'];			
-			if (symbols.includes(word[word.length-1])) {		// symbol from previous entry
-				this.setState({									// usuall followed by space
-					greek_text: greek_text+c,
-				});
-				return;
-			}
-
-			if (cached_words[word] !== undefined && suggest === false) {	
-				word = cached_words[word];
-			}else if (suggest_cached_words[word] !== undefined && suggest){
-				word = suggest_cached_words[word];
-			}else {		
-				const sigma_exp = new RegExp("σ$");			// ending sigma
-				word = word.replace(sigma_exp, "ς");
-				word = this.tone_word(word, res.data.split('\n'));
-			}
-			words_array[words_array.length-1] = word;			// replace word
-			lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
-
-			/* capitalize lines */
-			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
-			lines_array = lines_array.map( line => line.trim()); 
-			let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
-			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
-			if (suggest){
-				 lines = this.samecase_macthes(lines);
-			}
-
-			if (first_input)			// use the loading bar for the first conversion
-				this.setState({		
-					greek_text: lines+c,
-					first_input: false,
-					isloading: false,
-				});
-			else
-				this.setState({		
-					greek_text: lines+c,
-				});
-		})
+		if (cached_list.length === 0)
+			axios.get(greek_words).then(res => {
+				this.convert(c, res.data.split('\n'))
+			})
+		else
+			this.convert(c, cached_list)
 	}
 
 	handle_special(temp_text) {
