@@ -3,9 +3,9 @@ import TopBarProgress from "react-topbar-progress-indicator";
 import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
-import Radio from 'react-bootstrap/lib/Radio';
 import axios from 'axios';
 import greek_words from './Greek.dic';
+import "./index.css"
 
 TopBarProgress.config({
   barColors: {
@@ -309,13 +309,15 @@ export default class Fields extends Component {
 	}
 
 	set_suggest = e => {
+		const {suggest} = this.state;
 		this.setState({
-			suggest: parseInt(e.target.value) !== 0 ?  true : false
+			suggest: !suggest
 		})
 	}
 	set_input = e => {
+		const {raw_input} = this.state;
 		this.setState({
-			raw_input: parseInt(e.target.value) !== 0 ?  true : false
+			raw_input: !raw_input
 		})
 	}
 
@@ -347,47 +349,36 @@ export default class Fields extends Component {
 	      							/>
 								</FormGroup>
 							</div>
-							<div className="col-md-4">
+							<div className="col-md-4" align="center">
 								<FormGroup >
 									<ControlLabel>Raw Input: &nbsp;</ControlLabel>
-									<Radio 
-										name="raw_input_group" 
-										checked={raw_input === true}
-										onClick={this.set_input}
-										value="1"
-										inline>
-										on
-								 	</Radio>
+									<label className="switch">
+									  <input type="checkbox" />
+									  <span classssName="slider"></span>
+									</label>
 
-									<Radio 
-										name="raw_input_group" 
-										checked={raw_input === false}
+									<label className="switch">
+									  <input type="checkbox" 
 										onClick={this.set_input}
-										value="0"
-										inline>
-										off
-									</Radio>
+										checked={raw_input}  
+										/>
+									  <span className="slider round"></span>
+									</label>
 								</FormGroup>
 								<FormGroup >
 									<ControlLabel>Suggestions: &nbsp;</ControlLabel>
-									<Radio 
-										name="suggest_group"
-										checked={suggest === true}
+									<label className="switch">
+									  <input type="checkbox" />
+									  <span classssName="slider"></span>
+									</label>
+									<label className="switch">
+									  <input type="checkbox" 
 										onClick={this.set_suggest}
-										value="1"
-										inline>
-										on
-								 	</Radio>
-
-									<Radio 
-										name="suggest_group"
-										checked={suggest === false}
-										onClick={this.set_suggest}
-										value="0"
-										inline>
-										off
-									</Radio>
-								</FormGroup>							
+										checked={suggest}
+									   />
+									  <span className="slider round"></span>
+									</label>
+								</FormGroup>
 							</div>
 							<div className="col-md-4">
 								<FormGroup controlId="formControlsTextarea">
