@@ -6,6 +6,7 @@ import FormControl from 'react-bootstrap/lib/FormControl';
 import Panel from 'react-bootstrap/lib/Panel';
 import axios from 'axios';
 import greek_words from './Greek.dic';
+import cached_mathes from './seen_words';
 import "./index.css"
 
 TopBarProgress.config({
@@ -26,7 +27,7 @@ export default class Fields extends Component {
 			isloading: true,
 			first_input: true,
 			cached_list: [],
-			seen_words: {},
+			seen_words: cached_mathes,
 			suggest_seen_words: {},
 			raw_input: false,
 			suggest: false,
@@ -182,7 +183,7 @@ export default class Fields extends Component {
 			return;
 		}
 
-		if (seen_words[word] !== undefined && suggest === false) {	
+		if (seen_words[word] !== undefined && suggest === false) {
 			word = seen_words[word];
 		}else if (suggest_seen_words[word] !== undefined && suggest){
 			word = suggest_seen_words[word];
