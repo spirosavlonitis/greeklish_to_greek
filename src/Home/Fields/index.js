@@ -397,7 +397,7 @@ export default class Fields extends Component {
 							</div>
 						</div>
 					</div>
-			        <Panel id="collapsible-panel-example-2">
+			        <Panel id="collapsible-panel-example-2" defaultExpanded>
 			          <Panel.Heading>
 			            <Panel.Title toggle>
 			             Click for  Greeklish alphabet
@@ -405,10 +405,12 @@ export default class Fields extends Component {
 			          </Panel.Heading>
 			          <Panel.Collapse>
 			            <Panel.Body>
-			              Anim pariatur cliche reprehenderit, enim eiusmod high life
-			              accusamus terry richardson ad squid. Nihil anim keffiyeh
-			              helvetica, craft beer labore wes anderson cred nesciunt sapiente
-			              ea proident.
+			            	 Α &nbsp;:&nbsp; Α,&nbsp; Β &nbsp;:&nbsp; V&nbsp;,&nbsp; Γ &nbsp;:&nbsp; G&nbsp;,&nbsp;
+			            	 Δ &nbsp;:&nbsp; D,&nbsp; Ε &nbsp;:&nbsp; E,&nbsp; Z &nbsp;:&nbsp; Z,&nbsp; Η &nbsp;:&nbsp; H,&nbsp;
+			            	 Θ &nbsp;:&nbsp; TH | 8, &nbsp; Ι &nbsp;:&nbsp; I,&nbsp; Κ &nbsp;:&nbsp; K,&nbsp; Λ &nbsp;:&nbsp; L,&nbsp;
+			            	 Μ &nbsp;:&nbsp; M,&nbsp; Ν &nbsp;:&nbsp; N,&nbsp; Ξ &nbsp;:&nbsp; J&nbsp; |&nbsp; KS,&nbsp;  Ο &nbsp;:&nbsp; O,&nbsp;
+			            	 Π &nbsp;:&nbsp; P,&nbsp;  Ρ &nbsp;:&nbsp; R,&nbsp; &nbsp;Σ &nbsp;:&nbsp; S,&nbsp; Τ &nbsp;:&nbsp; T,&nbsp;
+			            	 Υ &nbsp;:&nbsp; Y&nbsp; |&nbsp; U,&nbsp; Φ &nbsp;:&nbsp; F,&nbsp;  Χ  &nbsp;:&nbsp; X,&nbsp;  Ψ  &nbsp;:&nbsp; PS,&nbsp; Ω  &nbsp;:&nbsp; W
 			            </Panel.Body>
 			          </Panel.Collapse>
 			        </Panel>
