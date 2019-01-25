@@ -397,7 +397,7 @@ export default class Fields extends Component {
 							</div>
 						</div>
 					</div>
-			        <Panel id="collapsible-panel-example-2" defaultExpanded>
+			        <Panel id="collapsible-panel-example-2">
 			          <Panel.Heading>
 			            <Panel.Title toggle>
 			             Click for  Greeklish alphabet
