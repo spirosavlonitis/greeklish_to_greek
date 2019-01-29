@@ -7,6 +7,7 @@ import Panel from 'react-bootstrap/lib/Panel';
 import axios from 'axios';
 import greek_words from './Greek.dic';
 import cached_mathes from './seen_words';
+import suggest_cached_words from './seen_words_suggest_trimmed'
 import "./index.css"
 
 TopBarProgress.config({
@@ -28,7 +29,7 @@ export default class Fields extends Component {
 			first_input: true,
 			cached_list: [],
 			seen_words: cached_mathes,
-			suggest_seen_words: {},
+			suggest_seen_words: suggest_cached_words,
 			raw_input: false,
 			suggest: false,
 			greek_text: ""
@@ -185,8 +186,11 @@ export default class Fields extends Component {
 
 		if (seen_words[word] !== undefined && suggest === false) {
 			word = seen_words[word];
-		}else if (suggest_seen_words[word] !== undefined && suggest){
-			word = suggest_seen_words[word];
+		}else if (suggest && (suggest_seen_words[word] !== undefined || seen_words[word] !== undefined)){
+			if (suggest_seen_words[word] !== undefined)
+				word = suggest_seen_words[word];
+			else
+				word = seen_words[word];
 		}else {		
 			const sigma_exp = new RegExp("σ$");			// ending sigma
 			word = word.replace(sigma_exp, "ς");
