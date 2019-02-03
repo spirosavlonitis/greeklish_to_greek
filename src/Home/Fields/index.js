@@ -32,6 +32,7 @@ export default class Fields extends Component {
 			suggest_seen_words: suggest_cached_words,
 			raw_input: false,
 			suggest: false,
+			only_tonoi: false,
 			greek_text: ""
 		};
 
@@ -314,6 +315,14 @@ export default class Fields extends Component {
 		})
 	}
 
+	set_tonoi = e => {
+		const {only_tonoi} = this.state;
+		this.setState({
+			only_tonoi: !only_tonoi
+		});
+		this.setState();
+	}
+
 	set_suggest = e => {
 		const {suggest} = this.state;
 		this.setState({
@@ -327,6 +336,7 @@ export default class Fields extends Component {
 		})
 	}
 
+
 	componentDidMount() {
 		this.setState({
 			isloading: false
@@ -334,15 +344,18 @@ export default class Fields extends Component {
 	}
 
 	render() {
-		const {greek_text, raw_input, suggest, isloading} = this.state;
-		
+		const {greek_text, raw_input, suggest, only_tonoi, isloading} = this.state;
+
+		const set_visibility = {
+			visibility: only_tonoi ? 'hidden' : 'visible'
+		}
 		return (
 			<div>
 				{ isloading && <TopBarProgress />}
 				<div className="container">
 					<div className="row">
 						<div className="col-md-12">
-							<div className="col-md-4">
+							<div className="col-md-4" style={set_visibility}>
 								<FormGroup 
 									controlId="formControlsTextarea"
 									onKeyPress= {this.convert_char}
@@ -388,6 +401,22 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
+								<FormGroup >
+									<ControlLabel className="switchLabel" >Only Tonoi</ControlLabel>
+									<label className="switch">
+									  <input type="checkbox" />
+									  <span classssName="slider"></span>
+									</label>
+									<b className="switchText" >OFF</b>
+									<label className="switch">
+									  <input type="checkbox" 
+										onClick={this.set_tonoi}
+										checked={only_tonoi}
+									   />
+									  <span className="slider round"></span>
+									</label>
+									<b className="switchText" >ON</b>
+								</FormGroup>							
 							</div>
 							<div className="col-md-4">
 								<FormGroup controlId="formControlsTextarea">

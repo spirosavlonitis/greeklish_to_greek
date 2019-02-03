@@ -67,3 +67,8 @@ input:checked + .slider:before {
   color: grey;
   font-size: 20px;
 }
+
+.foo {
+  visibility: hidden;
+  color: red;
+}
