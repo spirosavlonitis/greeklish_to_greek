@@ -37,6 +37,7 @@ export default class Fields extends Component {
 		};
 
 		this.convert_char = this.convert_char.bind(this);
+		this.greek_text_change = this.greek_text_change.bind(this);
 	}
 
 	isupper = (c) =>
@@ -160,13 +161,14 @@ export default class Fields extends Component {
 		}
 	}
 
+
 	convert(c, word_list=[]) {
-		const {greek_text, seen_words, suggest, suggest_seen_words, first_input, cached_list } = this.state;
+		const {greek_text, seen_words, suggest, only_tonoi, suggest_seen_words, first_input, cached_list } = this.state;
 
 		if (word_list.length === 0)
 			word_list = cached_list
 		
-		let lines_array = greek_text.split('\r');	// split text into lines
+		let lines_array = greek_text.split( only_tonoi ? '\n' : '\r');	// split text into lines
 		let words_array = lines_array[lines_array.length-1].split(' ')	// get last line array
 		let word = words_array[words_array.length-1];	// get last word
 
@@ -205,6 +207,7 @@ export default class Fields extends Component {
 		lines_array = lines_array.map( line => line.trim()); 
 		let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
 		lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+//		console.log(lines)
 		if (suggest){
 			 lines = this.samecase_macthes(lines);
 		}
@@ -255,8 +258,6 @@ export default class Fields extends Component {
 						.replace(/8([αεηιοωυρ])/g, 'θ$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
 						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
-//						.replace(/ντηρ([αεηιοωυ])/g, 'νθρ$1') // βαθμ
-//						.replace(/τηρ([αεηιοωυ])/g, 'θρ$1') // βαθμ
 	}
 
 	convert_char(e) {
@@ -299,10 +300,37 @@ export default class Fields extends Component {
 		});
 	}
 
-	greek_text_change = (e) => {
-		this.setState({
-			greek_text: e.target.value
-		})
+	greek_text_change(e) {
+		const {only_tonoi, cached_list, first_input, greek_text} = this.state;
+		const backcpase = greek_text.length > e.target.value.length;
+
+		if (only_tonoi === false || backcpase){		// check of user is deleting a char
+			this.setState({
+				greek_text: e.target.value
+			})
+			return;
+		}
+
+		const c = e.target.value[e.target.value.length-1];
+		if (this.is_greek_alpha(c)) {
+			this.setState({
+				greek_text: e.target.value
+			})
+			return;
+		}
+
+
+		if (first_input)
+			this.setState({
+				isloading:true
+			})
+
+		if (cached_list.length === 0)
+			axios.get(greek_words).then(res => {
+				this.convert(c, res.data.split('\n'))
+			})
+		else
+			this.convert(c, cached_list)
 	}
 
 	get_backspace = (e) => {
@@ -336,11 +364,10 @@ export default class Fields extends Component {
 		})
 	}
 
-
 	componentDidMount() {
 		this.setState({
 			isloading: false
-		})
+		});
 	}
 
 	render() {
