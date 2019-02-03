@@ -67,15 +67,3 @@ input:checked + .slider:before {
   color: grey;
   font-size: 20px;
 }
-
-.foo {
-  visibility: hidden;
-  color: red;
-}
-
-.center {
-  margin: auto;
-  width: 50%;
-  border: 3px solid green;
-  padding: 10px;
-}

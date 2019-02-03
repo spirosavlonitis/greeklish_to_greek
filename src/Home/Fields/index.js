@@ -76,7 +76,7 @@ export default class Fields extends Component {
 	}
 
 	tone_word(word, word_list, retry=false) {
-		const {seen_words, suggest, suggest_seen_words} = this.state;
+		const {seen_words, suggest, only_tonoi, suggest_seen_words} = this.state;
 
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
 		const lower_chars = [
@@ -125,12 +125,12 @@ export default class Fields extends Component {
 		}
 
 		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false){   // word was not a capital word
-		 	if (word.match(/(Τ|τ)ηρ/)){
+		 	if (word.match(/(Τ|τ)ηρ/) && only_tonoi === false){
 		 		best_match.push(this.tone_word(word.replace(/(Τ|τ)ηρ/, 'θρ').toLowerCase(), word_list, true));
 		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
 			 	if (suggest === false)
 			 		return best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
-		 	}else if(word.match(/(Θ|θ)ρ/)){
+		 	}else if(word.match(/(Θ|θ)ρ/) && only_tonoi === false){
 		 		best_match.push(this.tone_word(word.replace(/(Θ|θ)ρ/, 'τηρ').toLowerCase(), word_list, true));
 		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
 			 	if (suggest === false)
@@ -141,7 +141,7 @@ export default class Fields extends Component {
 		 	best_match = best_match.flat();		// flatten two dimention array created from array returned
 		 	if (suggest === false)
 		 		return best_match[0];
-		}else if (best_match.length === 0 && retry === false && word.match(/θρ/)){  // maybe τηρ
+		}else if (best_match.length === 0 && retry === false && word.match(/θρ/) && only_tonoi === false){  // maybe τηρ
 			best_match.push(this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true));
 		 	best_match = best_match.flat();
 		 	if (suggest === false)
@@ -405,7 +405,7 @@ export default class Fields extends Component {
 								</FormGroup>
 							</div>
 							<div className="col-md-4" align="center">
-								<FormGroup >
+								<FormGroup style={set_visibility} >
 									<ControlLabel className="switchLabel" >Raw Input &nbsp;</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
