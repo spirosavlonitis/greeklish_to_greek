@@ -141,7 +141,7 @@ export default class Fields extends Component {
 		 	best_match = best_match.flat();		// flatten two dimention array created from array returned
 		 	if (suggest === false)
 		 		return best_match[0];
-		}else if (best_match.length === 0 && retry === false && word.match(/θρ/) && only_tonoi === false){  // maybe τηρ
+		}else if (best_match.length === 0 && retry === false && word.match(/θρ/) && only_tonoi === false){  // maybe τηρ 
 			best_match.push(this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true));
 		 	best_match = best_match.flat();
 		 	if (suggest === false)
@@ -382,8 +382,10 @@ export default class Fields extends Component {
 		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
 		const center_text = {
 			  margin: 'auto',
-			  width: only_tonoi ? '50%' : '',
-			  padding: '10px'
+			  padding: '10px',
+			  'min-width': only_tonoi ? '100%' : '',
+			  position: only_tonoi ? 'absolute' : 'relative',
+			  top: '40%',
 		}
 		return (
 			<div>
@@ -459,7 +461,7 @@ export default class Fields extends Component {
 	      							<ControlLabel>Greek</ControlLabel>
 	      							<FormControl
 	      							 componentClass="textarea" 
-	      							 placeholder=""
+	      							 placeholder=""	      							 
 	      							 value={greek_text}
 	      							 onChange={this.greek_text_change}
 	      							/>
@@ -467,8 +469,8 @@ export default class Fields extends Component {
 							</div>
 						</div>
 					</div>
-			        <Panel id="collapsible-panel-example-2">
-			          <Panel.Heading>
+			        <Panel id="collapsible-panel-example-2" style={set_visibility}>
+			          <Panel.Heading >
 			            <Panel.Title toggle>
 			             Click for  Greeklish alphabet
 			            </Panel.Title>
