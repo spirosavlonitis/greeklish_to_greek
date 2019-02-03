@@ -384,8 +384,6 @@ export default class Fields extends Component {
 			  margin: 'auto',
 			  padding: '10px',
 			  'min-width': only_tonoi ? '100%' : '',
-			  position: only_tonoi ? 'absolute' : 'relative',
-			  top: '40%',
 		}
 		return (
 			<div>
@@ -400,10 +398,12 @@ export default class Fields extends Component {
 									onKeyDown={this.get_backspace}
 								>
 	      							<ControlLabel>Greeklish</ControlLabel>
-	      							<FormControl 
-	      								componentClass="textarea" 
-	      								placeholder="" 
-	      							/>
+	      							{ only_tonoi === false &&
+		      							<FormControl 
+		      								componentClass="textarea"
+		      								placeholder="" 
+		      							/>
+	      							}
 								</FormGroup>
 							</div>
 							<div className="col-md-4" align="center">
@@ -459,8 +459,8 @@ export default class Fields extends Component {
 							<div className="col-md-4" style={center_text}>
 								<FormGroup controlId="formControlsTextarea">
 	      							<ControlLabel>Greek</ControlLabel>
-	      							<FormControl
-	      							 componentClass="textarea" 
+	      							<FormControl 
+	      							 componentClass="textarea"
 	      							 placeholder=""	      							 
 	      							 value={greek_text}
 	      							 onChange={this.greek_text_change}
