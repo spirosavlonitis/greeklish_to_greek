@@ -168,7 +168,11 @@ export default class Fields extends Component {
 		if (word_list.length === 0)
 			word_list = cached_list
 		
+
 		let lines_array = greek_text.split( only_tonoi ? '\n' : '\r');	// split text into lines
+		if (only_tonoi)
+			lines_array[lines_array.length-1] = lines_array[lines_array.length-1].replace(/([.!?,])(?! )/gm, '$1 ');
+
 		let words_array = lines_array[lines_array.length-1].split(' ')	// get last line array
 		let word = words_array[words_array.length-1];	// get last word
 
@@ -186,6 +190,7 @@ export default class Fields extends Component {
 			});
 			return;
 		}
+
 
 		if (seen_words[word] !== undefined && suggest === false) {
 			word = seen_words[word];
@@ -207,7 +212,8 @@ export default class Fields extends Component {
 		lines_array = lines_array.map( line => line.trim()); 
 		let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
 		lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
-//		console.log(lines)
+		lines = lines.replace(/([.!?,])(?! )/gm, '$1 '); // canonicalize delimiters
+
 		if (suggest){
 			 lines = this.samecase_macthes(lines);
 		}
