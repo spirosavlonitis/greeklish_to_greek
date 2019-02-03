@@ -346,8 +346,11 @@ export default class Fields extends Component {
 	render() {
 		const {greek_text, raw_input, suggest, only_tonoi, isloading} = this.state;
 
-		const set_visibility = {
-			visibility: only_tonoi ? 'hidden' : 'visible'
+		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
+		const center_text = {
+			  margin: 'auto',
+			  width: only_tonoi ? '50%' : '',
+			  padding: '10px'
 		}
 		return (
 			<div>
@@ -418,7 +421,7 @@ export default class Fields extends Component {
 									<b className="switchText" >ON</b>
 								</FormGroup>							
 							</div>
-							<div className="col-md-4">
+							<div className="col-md-4" style={center_text}>
 								<FormGroup controlId="formControlsTextarea">
 	      							<ControlLabel>Greek</ControlLabel>
 	      							<FormControl
