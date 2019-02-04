@@ -53,6 +53,17 @@ export default class Fields extends Component {
 	is_greek_alpha = c =>
 		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'));
 
+	handle_special(temp_text) {
+		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
+						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
+						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
+						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
+						.replace(/τη([αεηιοωυρ])/g, 'θ$1')
+						.replace(/8([αεηιοωυρ])/g, 'θ$1')
+						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
+						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
+	}
+
 	samecase_macthes(lines) {
 		const lower_chars = [
 	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
@@ -162,7 +173,6 @@ export default class Fields extends Component {
 		}
 	}
 
-
 	convert(c, word_list=[]) {
 		const {
 			greek_text, seen_words, suggest, only_tonoi, auto_cap,
@@ -172,9 +182,8 @@ export default class Fields extends Component {
 		if (word_list.length === 0)
 			word_list = cached_list
 		
-
 		let lines_array = greek_text.split( only_tonoi ? '\n' : '\r');	// split text into lines
-		if (only_tonoi)
+		if (only_tonoi && auto_cap)
 			lines_array[lines_array.length-1] = lines_array[lines_array.length-1].replace(/([.!?,])(?! )/gm, '$1 ');
 
 		let words_array = lines_array[lines_array.length-1].split(' ')	// get last line array
@@ -219,12 +228,12 @@ export default class Fields extends Component {
 			lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
 			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
 			lines = lines.replace(/([.!?,])(?! )/gm, '$1 '); // canonicalize delimiters
-		}else {
+		}else 
 			lines = lines_array.join('\r')
-		}
-		if (suggest){
+		
+		if (suggest && auto_cap)
 			 lines = this.samecase_macthes(lines);
-		}
+		
 
 		if (first_input)			// use the loading bar for the first conversion
 			this.setState({		
@@ -261,17 +270,6 @@ export default class Fields extends Component {
 			})
 		else
 			this.convert(c, cached_list)
-	}
-
-	handle_special(temp_text) {
-		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
-						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
-						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
-						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
-						.replace(/τη([αεηιοωυρ])/g, 'θ$1')
-						.replace(/8([αεηιοωυρ])/g, 'θ$1')
-						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
-						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
 	}
 
 	convert_char(e) {
@@ -337,7 +335,6 @@ export default class Fields extends Component {
 			})
 			return;
 		}
-
 
 		if (first_input)
 			this.setState({
@@ -477,7 +474,7 @@ export default class Fields extends Component {
 									<b className="switchText" >ON</b>
 								</FormGroup>
 								<FormGroup >
-									<ControlLabel className="switchLabel" >Capitalize</ControlLabel>
+									<ControlLabel className="switchLabel" >Auto Caps</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
 									  <span classssName="slider"></span>
