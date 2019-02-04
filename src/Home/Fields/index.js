@@ -33,6 +33,7 @@ export default class Fields extends Component {
 			raw_input: false,
 			suggest: false,
 			only_tonoi: false,
+			auto_cap: true,
 			greek_text: ""
 		};
 
@@ -163,7 +164,10 @@ export default class Fields extends Component {
 
 
 	convert(c, word_list=[]) {
-		const {greek_text, seen_words, suggest, only_tonoi, suggest_seen_words, first_input, cached_list } = this.state;
+		const {
+			greek_text, seen_words, suggest, only_tonoi, auto_cap,
+			suggest_seen_words, first_input, cached_list 
+		} = this.state;
 
 		if (word_list.length === 0)
 			word_list = cached_list
@@ -208,12 +212,16 @@ export default class Fields extends Component {
 		lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
 
 		/* capitalize lines */
-		lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
-		lines_array = lines_array.map( line => line.trim()); 
-		let lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
-		lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
-		lines = lines.replace(/([.!?,])(?! )/gm, '$1 '); // canonicalize delimiters
-
+		let lines;
+		if (auto_cap) {
+			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
+			lines_array = lines_array.map( line => line.trim()); 
+			lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
+			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+			lines = lines.replace(/([.!?,])(?! )/gm, '$1 '); // canonicalize delimiters
+		}else {
+			lines = lines_array.join('\r')
+		}
 		if (suggest){
 			 lines = this.samecase_macthes(lines);
 		}
@@ -267,7 +275,7 @@ export default class Fields extends Component {
 	}
 
 	convert_char(e) {
-		const {greek_text, raw_input} = this.state;
+		const {greek_text, raw_input, auto_cap} = this.state;
 		let c = "";
 		
 	    const chars = {
@@ -300,7 +308,11 @@ export default class Fields extends Component {
 		else
 			c = chars[c];
 		
-		let new_text = greek_text.replace(/([.,?!])([^ ])/, '$1 $2'); // canonicalize symbols
+		let new_text;
+		if (auto_cap)		
+			new_text = greek_text.replace(/([.,?!])([^ ])/, '$1 $2'); // canonicalize symbols
+		else
+			new_text = greek_text;
 		this.setState({
 			greek_text: this.handle_special(new_text+c),
 		});
@@ -350,6 +362,14 @@ export default class Fields extends Component {
 		})
 	}
 
+	set_auto_cap = e => {
+		const {auto_cap} = this.state;
+		this.setState({
+			auto_cap: !auto_cap
+		});
+		this.setState();
+	}
+
 	set_tonoi = e => {
 		const {only_tonoi} = this.state;
 		this.setState({
@@ -378,7 +398,7 @@ export default class Fields extends Component {
 	}
 
 	render() {
-		const {greek_text, raw_input, suggest, only_tonoi, isloading} = this.state;
+		const {greek_text, raw_input, suggest, only_tonoi, auto_cap, isloading} = this.state;
 
 		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
 		const center_text = {
@@ -455,7 +475,23 @@ export default class Fields extends Component {
 									  <span className="slider round"></span>
 									</label>
 									<b className="switchText" >ON</b>
-								</FormGroup>							
+								</FormGroup>
+								<FormGroup >
+									<ControlLabel className="switchLabel" >Capitalize</ControlLabel>
+									<label className="switch">
+									  <input type="checkbox" />
+									  <span classssName="slider"></span>
+									</label>
+									<b className="switchText" >OFF</b>
+									<label className="switch">
+									  <input type="checkbox" 
+										onClick={this.set_auto_cap}
+										checked={auto_cap}
+									   />
+									  <span className="slider round"></span>
+									</label>
+									<b className="switchText" >ON</b>
+								</FormGroup>
 							</div>
 							<div className="col-md-4" style={center_text}>
 								<FormGroup controlId="formControlsTextarea">
