@@ -208,7 +208,6 @@ export default class Fields extends Component {
 		word = word.replace(new RegExp("σ$"), "ς"); 		// ending sigma
 
 		if (seen_words[word] !== undefined && suggest === false) {
-			console.log('cache hit')
 			word = seen_words[word];
 		}else if (suggest && (suggest_seen_words[word] !== undefined || seen_words[word] !== undefined)){
 			if (suggest_seen_words[word] !== undefined)
