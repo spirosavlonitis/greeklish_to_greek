@@ -204,7 +204,8 @@ export default class Fields extends Component {
 			return;
 		}
 
-
+		const capital_word = this.is_greek_upper(word[0]);  // user entered a capital word
+		
 		if (seen_words[word] !== undefined && suggest === false) {
 			word = seen_words[word];
 		}else if (suggest && (suggest_seen_words[word] !== undefined || seen_words[word] !== undefined)){
@@ -217,6 +218,8 @@ export default class Fields extends Component {
 			word = word.replace(sigma_exp, "ς");
 			word = this.tone_word(word, word_list);
 		}
+		if (capital_word)
+			word = word[0].toUpperCase() + word.substring(1, word.length);
 		words_array[words_array.length-1] = word;			// replace word
 		lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
 
@@ -231,7 +234,7 @@ export default class Fields extends Component {
 		}else 
 			lines = lines_array.join('\r')
 		
-		if (suggest && auto_cap)
+		if (suggest && (auto_cap || capital_word))
 			 lines = this.samecase_macthes(lines);
 		
 
@@ -246,19 +249,11 @@ export default class Fields extends Component {
 			this.setState({		
 				greek_text: lines+c,
 			});
-
 	}
 
 	handle_non_apla(c) {
-		const {raw_input, first_input, cached_list } = this.state;
+		const {first_input, cached_list } = this.state;
 		
-		if (c === '"') {
-			this.setState({
-				raw_input: !raw_input
-			})
-			return
-		}
-
 		if (first_input)
 			this.setState({
 				isloading:true
@@ -289,11 +284,6 @@ export default class Fields extends Component {
 		else if (e.which)
 			c = String.fromCharCode(e.which);
 
-		if (this.isalpha(c) === false) {			// tone word if space
-			this.handle_non_apla(c);
-			return
-		}
-
 		if (raw_input) {
 			this.setState({
 				greek_text: greek_text+c
@@ -301,6 +291,10 @@ export default class Fields extends Component {
 			return
 		}
 
+		if (this.isalpha(c) === false) {			// tone word if space
+			this.handle_non_apla(c);
+			return
+		}
 		if (this.isupper(c))
 			c = chars[c.toLowerCase()].toUpperCase();
 		else
