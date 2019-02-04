@@ -205,8 +205,10 @@ export default class Fields extends Component {
 		}
 
 		const capital_word = this.is_greek_upper(word[0]);  // user entered a capital word
-		
+		word = word.replace(new RegExp("σ$"), "ς"); 		// ending sigma
+
 		if (seen_words[word] !== undefined && suggest === false) {
+			console.log('cache hit')
 			word = seen_words[word];
 		}else if (suggest && (suggest_seen_words[word] !== undefined || seen_words[word] !== undefined)){
 			if (suggest_seen_words[word] !== undefined)
@@ -214,12 +216,11 @@ export default class Fields extends Component {
 			else
 				word = seen_words[word];
 		}else {		
-			const sigma_exp = new RegExp("σ$");			// ending sigma
-			word = word.replace(sigma_exp, "ς");
 			word = this.tone_word(word, word_list);
 		}
 		if (capital_word)
 			word = word[0].toUpperCase() + word.substring(1, word.length);
+		
 		words_array[words_array.length-1] = word;			// replace word
 		lines_array[lines_array.length-1] = words_array.join(' ');		// rejoin last line
 
