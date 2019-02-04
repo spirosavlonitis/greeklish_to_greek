@@ -7,8 +7,8 @@ import Panel from 'react-bootstrap/lib/Panel';
 import axios from 'axios';
 import greek_words from './Greek.dic';
 import cached_mathes from './seen_words';
-import suggest_cached_words from './seen_words_suggest_trimmed'
-import "./index.css"
+import suggest_cached_words from './seen_words_suggest_trimmed';
+import "./index.css";
 
 TopBarProgress.config({
   barColors: {
@@ -309,8 +309,9 @@ export default class Fields extends Component {
 	greek_text_change(e) {
 		const {only_tonoi, cached_list, first_input, greek_text} = this.state;
 		const backcpase = greek_text.length > e.target.value.length;
-
-		if (only_tonoi === false || backcpase){		// check of user is deleting a char
+		const paste = e.target.value.length-greek_text.length > 1;
+		
+		if (only_tonoi === false || backcpase || paste){		// check of user is deleting a char
 			this.setState({
 				greek_text: e.target.value
 			})
