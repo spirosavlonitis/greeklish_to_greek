@@ -500,7 +500,24 @@ export default class Fields extends Component {
 			        <Panel id="collapsible-panel-example-2" style={set_visibility}>
 			          <Panel.Heading >
 			            <Panel.Title toggle>
-			             Click for  Greeklish alphabet
+			             Οδηγίες Χρήσης
+			            </Panel.Title>
+			          </Panel.Heading>
+			          <Panel.Collapse>
+			            <Panel.Body>
+			            	Για να μετατρέψετε ένα κείμενο από Greeklish σε Greek απλά γράψτε στο πεδίο Greeklish και δείτε το στο πεδίο Greek στα Ελληνικά.<br/>
+			            	Οι επιλογές ON/OFF κάνουν τα εξής:<br/>
+			            	<b>Raw input</b>: Όταν είναι ON ότι γράψουμε στο Greeklish πεδίο εμφανίζετε στο Greek πεδίο χωρίς καμιά μετατροπή.<br/>
+			            	<b>Suggestions</b>: Όταν είναι ON λέξεις  πού τονίζονται με περισσοτέρους από έναν τόνους εμφανίζονται χωρισμένες με / για παράδειγμα αλλά/άλλα<br/>
+			            	<b>Only Tonoi</b>: Όταν είναι ON φεύγει το Greeklish πεδίο και μένει μονό το Greek πεδίο. Μέτα γράφουμε στο  Greek πεδίο με ελληνικούς χαρακτήρες και οι τόνοι, τελικά ς μπαίνουν αυτόματα. Τα Suggestions εάν είναι   ON συνεχίζουν να λειτουργούν.<br/>
+			            	<b>Auto Caps</b>: Όταν εινα  ON το κείμενο βάζει αυτόματα κεφαλαία γράμματα οπότε χρειάζεται για περισσότερο ελέγχο πάνω στο κείμενο μπορούμε να απενεργοποιήσουμε αυτήν την επιλογή.
+			            </Panel.Body>
+			          </Panel.Collapse>
+			        </Panel>
+			        <Panel id="collapsible-panel-example-3" style={set_visibility}>
+			          <Panel.Heading >
+			            <Panel.Title toggle>
+			             Greeklish Αλφάβητο
 			            </Panel.Title>
 			          </Panel.Heading>
 			          <Panel.Collapse>
