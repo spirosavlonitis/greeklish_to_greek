@@ -293,7 +293,7 @@ export default class Fields extends Component {
 			return
 		}
 
-		if (this.isalpha(c) === false) {			// tone word if space
+		if (this.isalpha(c) === false && static_c.length === 0) {			// tone word if space
 			this.handle_non_apla(c);
 			return
 		}
@@ -303,8 +303,8 @@ export default class Fields extends Component {
 		else
 			c = chars[c];
 		
-		if (static_c.length !== 0)					// static text character
-			return c;
+		if (static_c.length !== 0)				// static text character
+			return (c  === undefined) ?   static_c :  c;
 
 		let new_text;
 		if (auto_cap)		
@@ -354,36 +354,55 @@ export default class Fields extends Component {
 			cached_list, seen_words, suggest_seen_words,
 			suggest, only_tonoi, auto_cap
 		} = this.state;
-
+		
 		const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
 		const orig_text = document.getElementById(textarea).value;
 		let lines = orig_text.split('\n');
-		
+
 		const words = []
 		for (let l = 0; l < lines.length; l++, words.push("\n")) {
 			lines[l] = lines[l].replace(/([.!?,]+)(?! )/gm, '$1 '); // canonicalize delimiters
 			const orig_words = lines[l].split(' ');
-			
+
 			let  conv_word = "", capital = false, word, delim;
 			for (let i = 0; i < orig_words.length; i++, conv_word = "", capital = false)  {
 				word = orig_words[i];
+				
 				if (word.length === 0)						// stray space
 					continue;
+
 				delim = word.match(/[.?!/;]+/);
 				word = word.replace(/[.?!,/;]+/, '');
 				
 				if (word.length === 0) {					// only a delimiter
-					console.log(delim)
 					words.push(delim);
 					words.push(' ');
 					continue
 				}
 
-				for (let j = 0; j < word.length; j++) 					// convert word to greek chars
-					conv_word += this.convert_char(true, word[j]);
+				if (only_tonoi === false) {				// check if greek char input
+					for (let j = 0; j < word.length; j++) 					// convert word to greek chars
+						conv_word += this.convert_char(true, word[j]);
+					conv_word = this.handle_special(conv_word);
+					conv_word = conv_word.replace(new RegExp("σ$"), "ς");
+				}else {
+					conv_word = word;
+					conv_word = conv_word.replace(new RegExp("σ$"), "ς");
+					if (conv_word.match(/[άήέίόύώ]/)) {					// already toned word
+						if (delim)
+							conv_word = orig_words[i]+delim;
+						words.push(conv_word);
+						if (i+ 1 !== orig_words.length)					// if not last word
+							words.push(' ');							// add space
+						continue;
+					} 
+				}
+				
+				if (conv_word.length === 0)				// unknown error
+					continue;
 
+				conv_word = conv_word.replace(new RegExp("σ$"), "ς"); 	// ending sigma
 				if (this.is_greek_upper(conv_word[0])) capital = true;
-				conv_word = this.handle_special(conv_word);
 
 				if (seen_words[conv_word] !== undefined || suggest_seen_words[conv_word] !== undefined)		// check if word is cached
 					if (suggest && suggest_seen_words[conv_word] !== undefined)
@@ -399,8 +418,8 @@ export default class Fields extends Component {
 					conv_word += delim;
 				
 				words.push(conv_word);
-				if (i+ 1 !== orig_words.length)
-					words.push(' ');							// add spaces
+				if (i+ 1 !== orig_words.length)					// if not last word
+					words.push(' ');							// add space
 			}
 		}
 
@@ -412,6 +431,7 @@ export default class Fields extends Component {
 			lines = lines.replace(/([.!?,;])(?! )/gm, '$1 '); // canonicalize delimiters
 		}
 
+		lines = lines.trim();			// remove trailing \n
 		this.setState({
 			greek_text: lines,
 			isloading: false
