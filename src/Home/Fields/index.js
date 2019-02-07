@@ -356,43 +356,82 @@ export default class Fields extends Component {
 		const {cached_list} = this.state;
 
 		const orig_text = document.getElementById('formControlsGreeklishTextarea').value;
-		const orig_words = orig_text.split(' ');
-		const words = []
-
-		let conv_word = "";
-		for (let i = 0, word, delim; i < orig_words.length; i++, conv_word = "")  {
-			word = orig_words[i];
-			delim = word.match(/[.?!,]/);
-			word = word.replace(/[.?!,]/, '');
-
-			for (let j = 0; j < word.length; j++) 
-				conv_word += this.convert_char(true, word[j])
-			words.push(conv_word);
-		}
-				
+		let lines = orig_text.split('\n');
 
 		this.setState({
-			greek_text: words.join(' ')
-		})
+			isloading: true
+		});
+		const words = []
+		for (let l = 0; l < lines.length; l++, words.push("\n")) {
+			lines[l] = lines[l].replace(/([.!?,]+)(?! )/gm, '$1 '); // canonicalize delimiters
+			const orig_words = lines[l].split(' ');
+			
+			let  conv_word = "", capital = false, word, delim;
+			for (let i = 0; i < orig_words.length; i++, conv_word = "", capital = false)  {
+				word = orig_words[i];
+				if (word.length === 0)						// stray space
+					continue;
+				delim = word.match(/[.?!]+/);
+				word = word.replace(/[.?!,]+/, '');
+
+				if (word.length === 0) {					// only a delimiter
+					console.log(delim)
+					words.push(delim);
+					words.push(' ');
+					continue
+				}
+
+				for (let j = 0; j < word.length; j++) 					// convert word to greek chars
+					conv_word += this.convert_char(true, word[j]);
+
+				if (this.is_greek_upper(conv_word[0])) capital = true;
+				conv_word = this.tone_word(this.handle_special(conv_word), cached_list);
+
+				if (capital)
+					conv_word = conv_word[0].toUpperCase() + conv_word.substring(1, conv_word.length);
+				if (delim)
+					conv_word += delim;
+				
+				words.push(conv_word);
+				if (i+ 1 !== orig_words.length)
+					words.push(' ');							// add spaces
+			}
+		}
+			
+		this.setState({
+			greek_text: words.join(''),
+			isloading: false
+		});
 		
 	}
 
 	get_backspace = (e) => {
 		const {greek_text, } = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
-			return
+			return;
 
 		this.setState({
 			greek_text: greek_text.length > 0 ? greek_text.slice(0, greek_text.length-1) : ""
-		})
+		});
 	}
 
 	set_live = e => {
-		const {live} = this.state;
-		this.setState({
-			live: !live
-		});
-		this.setState();
+		const {live, cached_list} = this.state;
+
+		if (cached_list.length === 0) {
+			this.setState({loading: true});
+			axios.get(greek_words).then( res => {
+				this.setState({				
+					live: !live,
+					cached_list: res.data.split("\n"),
+					first_input: false,
+					isloading: false,
+				})
+			});
+		}else
+			this.setState({
+				live: !live
+			});
 	}
 
 	set_auto_cap = e => {
@@ -400,7 +439,6 @@ export default class Fields extends Component {
 		this.setState({
 			auto_cap: !auto_cap
 		});
-		this.setState();
 	}
 
 	set_tonoi = e => {
@@ -408,7 +446,6 @@ export default class Fields extends Component {
 		this.setState({
 			only_tonoi: !only_tonoi
 		});
-		this.setState();
 	}
 
 	set_suggest = e => {
