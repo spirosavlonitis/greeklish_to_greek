@@ -4,6 +4,7 @@ import FormGroup from 'react-bootstrap/lib/FormGroup';
 import ControlLabel from 'react-bootstrap/lib/ControlLabel';
 import FormControl from 'react-bootstrap/lib/FormControl';
 import Panel from 'react-bootstrap/lib/Panel';
+import Button from 'react-bootstrap/lib/Button';
 import axios from 'axios';
 import greek_words from './Greek.dic';
 import cached_mathes from './seen_words';
@@ -34,11 +35,13 @@ export default class Fields extends Component {
 			suggest: false,
 			only_tonoi: false,
 			auto_cap: true,
+			live: true,
 			greek_text: ""
 		};
 
 		this.convert_char = this.convert_char.bind(this);
 		this.greek_text_change = this.greek_text_change.bind(this);
+		this.convertText = this.convertText.bind(this);
 	}
 
 	isupper = (c) =>
@@ -267,7 +270,7 @@ export default class Fields extends Component {
 			this.convert(c, cached_list)
 	}
 
-	convert_char(e) {
+	convert_char(e, static_c="") {
 		const {greek_text, raw_input, auto_cap} = this.state;
 		let c = "";
 		
@@ -278,11 +281,13 @@ export default class Fields extends Component {
 	        "s": "σ", "t": "τ", "u": "υ", "v": "β", "w": "ω", "x": "χ",
 	        "y": "υ","z": "ζ"
 	    };
-		
-		if (e.KeyCode)
-		 	c = String.fromCharCode(e.KeyCode);
-		else if (e.which)
-			c = String.fromCharCode(e.which);
+		if (static_c.length === 0){
+			if (e.KeyCode)
+			 	c = String.fromCharCode(e.KeyCode);
+			else if (e.which)
+				c = String.fromCharCode(e.which);
+		}else
+			c = static_c
 
 		if (raw_input) {
 			this.setState({
@@ -295,11 +300,15 @@ export default class Fields extends Component {
 			this.handle_non_apla(c);
 			return
 		}
+
 		if (this.isupper(c))
 			c = chars[c.toLowerCase()].toUpperCase();
 		else
 			c = chars[c];
 		
+		if (static_c.length !== 0)					// static text character
+			return c;
+
 		let new_text;
 		if (auto_cap)		
 			new_text = greek_text.replace(/([.,?!])([^ ])/, '$1 $2'); // canonicalize symbols
@@ -343,6 +352,31 @@ export default class Fields extends Component {
 			this.convert(c, cached_list)
 	}
 
+	convertText() {
+		const {cached_list} = this.state;
+
+		const orig_text = document.getElementById('formControlsGreeklishTextarea').value;
+		const orig_words = orig_text.split(' ');
+		const words = []
+
+		let conv_word = "";
+		for (let i = 0, word, delim; i < orig_words.length; i++, conv_word = "")  {
+			word = orig_words[i];
+			delim = word.match(/[.?!,]/);
+			word = word.replace(/[.?!,]/, '');
+
+			for (let j = 0; j < word.length; j++) 
+				conv_word += this.convert_char(true, word[j])
+			words.push(conv_word);
+		}
+				
+
+		this.setState({
+			greek_text: words.join(' ')
+		})
+		
+	}
+
 	get_backspace = (e) => {
 		const {greek_text, } = this.state;
 		if (e.KeyCode !== 8 && e.which !== 8)
@@ -351,6 +385,14 @@ export default class Fields extends Component {
 		this.setState({
 			greek_text: greek_text.length > 0 ? greek_text.slice(0, greek_text.length-1) : ""
 		})
+	}
+
+	set_live = e => {
+		const {live} = this.state;
+		this.setState({
+			live: !live
+		});
+		this.setState();
 	}
 
 	set_auto_cap = e => {
@@ -389,13 +431,15 @@ export default class Fields extends Component {
 	}
 
 	render() {
-		const {greek_text, raw_input, suggest, only_tonoi, auto_cap, isloading} = this.state;
+		const {
+			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isloading
+		} = this.state;
 
 		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
 		const center_text = {
 			  margin: 'auto',
 			  padding: '10px',
-			  'min-width': only_tonoi ? '100%' : '',
+			  'minWidth': only_tonoi ? '100%' : '',
 		}
 		return (
 			<div>
@@ -405,8 +449,8 @@ export default class Fields extends Component {
 						<div className="col-md-12">
 							<div className="col-md-4" style={set_visibility}>
 								<FormGroup 
-									controlId="formControlsTextarea"
-									onKeyPress= {this.convert_char}
+									controlId="formControlsGreeklishTextarea"
+									onKeyPress= { live ? this.convert_char : undefined}
 									onKeyDown={this.get_backspace}
 								>
 	      							<ControlLabel>Greeklish</ControlLabel>
@@ -423,13 +467,12 @@ export default class Fields extends Component {
 									<ControlLabel className="switchLabel" >Raw Input &nbsp;</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
-									  <span classssName="slider"></span>
 									</label>
 									<b className="switchText" >OFF</b>
 									<label className="switch">
 									  <input type="checkbox" 
 										onClick={this.set_input}
-										checked={raw_input}  
+										defaultChecked={raw_input}  
 										/>
 									  <span className="slider round"></span>
 									</label>
@@ -439,13 +482,12 @@ export default class Fields extends Component {
 									<ControlLabel className="switchLabel" >Suggestions</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
-									  <span classssName="slider"></span>
 									</label>
 									<b className="switchText" >OFF</b>
 									<label className="switch">
 									  <input type="checkbox" 
 										onClick={this.set_suggest}
-										checked={suggest}
+										defaultChecked={suggest}
 									   />
 									  <span className="slider round"></span>
 									</label>
@@ -455,13 +497,12 @@ export default class Fields extends Component {
 									<ControlLabel className="switchLabel" >Only Tonoi</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
-									  <span classssName="slider"></span>
 									</label>
 									<b className="switchText" >OFF</b>
 									<label className="switch">
 									  <input type="checkbox" 
 										onClick={this.set_tonoi}
-										checked={only_tonoi}
+										defaultChecked={only_tonoi}
 									   />
 									  <span className="slider round"></span>
 									</label>
@@ -471,21 +512,43 @@ export default class Fields extends Component {
 									<ControlLabel className="switchLabel" >Auto Caps</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
-									  <span classssName="slider"></span>
 									</label>
 									<b className="switchText" >OFF</b>
 									<label className="switch">
 									  <input type="checkbox" 
 										onClick={this.set_auto_cap}
-										checked={auto_cap}
+										defaultChecked={auto_cap}
 									   />
 									  <span className="slider round"></span>
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
+								<FormGroup >
+									<ControlLabel className="switchLabel" >Live</ControlLabel>
+									<label className="switch">
+									  <input type="checkbox" />
+									</label>
+									<label className="switch">
+									  <input type="checkbox" />
+									</label>
+									<b className="switchText" >OFF</b>
+									<label className="switch">
+									  <input type="checkbox" 
+										onClick={this.set_live}
+										defaultChecked={live}
+									   />
+									  <span className="slider round"></span>
+									</label>
+									<b className="switchText" >ON</b>
+								</FormGroup>								
+								{ !live &&
+								 <Button
+								 	onClick= {this.convertText}
+								  >Convert
+								 </Button> }
 							</div>
 							<div className="col-md-4" style={center_text}>
-								<FormGroup controlId="formControlsTextarea">
+								<FormGroup controlId="formControlsGreekTextarea">
 	      							<ControlLabel>Greek</ControlLabel>
 	      							<FormControl 
 	      							 componentClass="textarea"
