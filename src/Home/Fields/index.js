@@ -199,7 +199,7 @@ export default class Fields extends Component {
 			return;
 		}
 
-		const symbols = ['.', ',', '\'', '!', '?'];			
+		const symbols = ['.', ',', '\'', '!', '?', ';'];			
 		if (symbols.includes(word[word.length-1])) {		// symbol from previous entry
 			this.setState({									// usuall followed by space
 				greek_text: greek_text+c,
@@ -210,16 +210,14 @@ export default class Fields extends Component {
 		const capital_word = this.is_greek_upper(word[0]);  // user entered a capital word
 		word = word.replace(new RegExp("σ$"), "ς"); 		// ending sigma
 
-		if (seen_words[word] !== undefined && suggest === false) {
-			word = seen_words[word];
-		}else if (suggest && (suggest_seen_words[word] !== undefined || seen_words[word] !== undefined)){
-			if (suggest_seen_words[word] !== undefined)
+		if (seen_words[word] !== undefined || suggest_seen_words[word] !== undefined)
+			if (suggest && suggest_seen_words[word] !== undefined)
 				word = suggest_seen_words[word];
 			else
 				word = seen_words[word];
-		}else {		
+		else 
 			word = this.tone_word(word, word_list);
-		}
+		
 		if (capital_word)
 			word = word[0].toUpperCase() + word.substring(1, word.length);
 		
@@ -231,15 +229,14 @@ export default class Fields extends Component {
 		if (auto_cap) {
 			lines_array[0] = lines_array[0].replace(/^(.{1})/, m => m.toUpperCase()); // capitalize first letter
 			lines_array = lines_array.map( line => line.trim()); 
-			lines = lines_array.join('\r').replace(/[.!?] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
-			lines = lines.replace(/[.!?]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
-			lines = lines.replace(/([.!?,])(?! )/gm, '$1 '); // canonicalize delimiters
+			lines = lines_array.join('\r').replace(/[.!?;] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
+			lines = lines.replace(/[.!?;]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+			lines = lines.replace(/([.!?,;])(?! )/gm, '$1 '); // canonicalize delimiters
 		}else 
 			lines = lines_array.join('\r')
 		
 		if (suggest && (auto_cap || capital_word))
 			 lines = this.samecase_macthes(lines);
-		
 
 		if (first_input)			// use the loading bar for the first conversion
 			this.setState({		
@@ -311,7 +308,7 @@ export default class Fields extends Component {
 
 		let new_text;
 		if (auto_cap)		
-			new_text = greek_text.replace(/([.,?!])([^ ])/, '$1 $2'); // canonicalize symbols
+			new_text = greek_text.replace(/([.,?!;])([^ ])/, '$1 $2'); // canonicalize symbols
 		else
 			new_text = greek_text;
 		this.setState({
@@ -320,11 +317,11 @@ export default class Fields extends Component {
 	}
 
 	greek_text_change(e) {
-		const {only_tonoi, cached_list, first_input, greek_text} = this.state;
+		const {only_tonoi, live, cached_list, first_input, greek_text} = this.state;
 		const backcpase = greek_text.length > e.target.value.length;
 		const paste = e.target.value.length-greek_text.length > 1;
-		
-		if (only_tonoi === false || backcpase || paste){		// check of user is deleting a char
+
+		if (only_tonoi === false || backcpase || paste || live === false){		// check of user is deleting a char
 			this.setState({
 				greek_text: e.target.value
 			})
@@ -353,14 +350,15 @@ export default class Fields extends Component {
 	}
 
 	convertText() {
-		const {cached_list} = this.state;
+		const {
+			cached_list, seen_words, suggest_seen_words,
+			suggest, only_tonoi, auto_cap
+		} = this.state;
 
-		const orig_text = document.getElementById('formControlsGreeklishTextarea').value;
+		const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
+		const orig_text = document.getElementById(textarea).value;
 		let lines = orig_text.split('\n');
-
-		this.setState({
-			isloading: true
-		});
+		
 		const words = []
 		for (let l = 0; l < lines.length; l++, words.push("\n")) {
 			lines[l] = lines[l].replace(/([.!?,]+)(?! )/gm, '$1 '); // canonicalize delimiters
@@ -371,9 +369,9 @@ export default class Fields extends Component {
 				word = orig_words[i];
 				if (word.length === 0)						// stray space
 					continue;
-				delim = word.match(/[.?!]+/);
-				word = word.replace(/[.?!,]+/, '');
-
+				delim = word.match(/[.?!/;]+/);
+				word = word.replace(/[.?!,/;]+/, '');
+				
 				if (word.length === 0) {					// only a delimiter
 					console.log(delim)
 					words.push(delim);
@@ -385,7 +383,15 @@ export default class Fields extends Component {
 					conv_word += this.convert_char(true, word[j]);
 
 				if (this.is_greek_upper(conv_word[0])) capital = true;
-				conv_word = this.tone_word(this.handle_special(conv_word), cached_list);
+				conv_word = this.handle_special(conv_word);
+
+				if (seen_words[conv_word] !== undefined || suggest_seen_words[conv_word] !== undefined)		// check if word is cached
+					if (suggest && suggest_seen_words[conv_word] !== undefined)
+						conv_word = suggest_seen_words[conv_word];
+					else
+						conv_word = seen_words[conv_word];
+				else		
+					conv_word = this.tone_word(conv_word, cached_list);
 
 				if (capital)
 					conv_word = conv_word[0].toUpperCase() + conv_word.substring(1, conv_word.length);
@@ -397,9 +403,17 @@ export default class Fields extends Component {
 					words.push(' ');							// add spaces
 			}
 		}
-			
+
+		lines = words.join('');
+		if (auto_cap) {
+			lines = lines[0].toUpperCase() + lines.substring(1, lines.length);
+			lines = lines.replace(/[.!?;] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
+			lines = lines.replace(/[.!?;]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+			lines = lines.replace(/([.!?,;])(?! )/gm, '$1 '); // canonicalize delimiters
+		}
+
 		this.setState({
-			greek_text: words.join(''),
+			greek_text: lines,
 			isloading: false
 		});
 		
