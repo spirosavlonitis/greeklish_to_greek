@@ -26,7 +26,7 @@ export default class Fields extends Component {
 		super(props);
 
 		this.state = {
-			isloading: true,
+			isLoading: true,
 			first_input: true,
 			cached_list: [],
 			seen_words: cached_mathes,
@@ -241,7 +241,7 @@ export default class Fields extends Component {
 		if (first_input)			// use the loading bar for the first conversion
 			this.setState({		
 				first_input: false,
-				isloading: false,
+				isLoading: false,
 				cached_list: word_list,
 				greek_text: lines+c
 			});
@@ -256,7 +256,7 @@ export default class Fields extends Component {
 		
 		if (first_input)
 			this.setState({
-				isloading:true
+				isLoading:true
 			})
 
 		if (cached_list.length === 0)
@@ -338,7 +338,7 @@ export default class Fields extends Component {
 
 		if (first_input)
 			this.setState({
-				isloading:true
+				isLoading:true
 			})
 
 		if (cached_list.length === 0)
@@ -349,94 +349,95 @@ export default class Fields extends Component {
 			this.convert(c, cached_list)
 	}
 
-	convertText() {
+	convertText(e) {
 		const {
 			cached_list, seen_words, suggest_seen_words,
 			suggest, only_tonoi, auto_cap
 		} = this.state;
 		
-		const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
-		const orig_text = document.getElementById(textarea).value;
-		let lines = orig_text.split('\n');
+		this.setState({ isLoading: true}, () =>{
+			const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
+			const orig_text = document.getElementById(textarea).value;
+			let lines = orig_text.split('\n');
 
-		const words = []
-		for (let l = 0; l < lines.length; l++, words.push("\n")) {
-			lines[l] = lines[l].replace(/([.!?,]+)(?! )/gm, '$1 '); // canonicalize delimiters
-			const orig_words = lines[l].split(' ');
+			const words = []
+			for (let l = 0; l < lines.length; l++, words.push("\n")) {
+				lines[l] = lines[l].replace(/([.!?,]+)(?! )/gm, '$1 '); // canonicalize delimiters
+				const orig_words = lines[l].split(' ');
 
-			let  conv_word = "", capital = false, word, delim;
-			for (let i = 0; i < orig_words.length; i++, conv_word = "", capital = false)  {
-				word = orig_words[i];
-				
-				if (word.length === 0)						// stray space
-					continue;
-
-				delim = word.match(/[.?!/;]+/);
-				word = word.replace(/[.?!,/;]+/, '');
-				
-				if (word.length === 0) {					// only a delimiter
-					words.push(delim);
-					words.push(' ');
-					continue
-				}
-
-				if (only_tonoi === false) {				// check if greek char input
-					for (let j = 0; j < word.length; j++) 					// convert word to greek chars
-						conv_word += this.convert_char(true, word[j]);
-					conv_word = this.handle_special(conv_word);
-					conv_word = conv_word.replace(new RegExp("σ$"), "ς");
-				}else {
-					conv_word = word;
-					conv_word = conv_word.replace(new RegExp("σ$"), "ς");
-					if (conv_word.match(/[άήέίόύώ]/)) {					// already toned word
-						if (delim)
-							conv_word = orig_words[i]+delim;
-						words.push(conv_word);
-						if (i+ 1 !== orig_words.length)					// if not last word
-							words.push(' ');							// add space
+				let  conv_word = "", capital = false, word, delim;
+				for (let i = 0; i < orig_words.length; i++, conv_word = "", capital = false)  {
+					word = orig_words[i];
+					
+					if (word.length === 0)						// stray space
 						continue;
-					} 
+
+					delim = word.match(/[.?!/;]+/);
+					word = word.replace(/[.?!,/;]+/, '');
+					
+					if (word.length === 0) {					// only a delimiter
+						words.push(delim);
+						words.push(' ');
+						continue
+					}
+
+					if (only_tonoi === false) {				// check if greek char input
+						for (let j = 0; j < word.length; j++) 					// convert word to greek chars
+							conv_word += this.convert_char(true, word[j]);
+						conv_word = this.handle_special(conv_word);
+						conv_word = conv_word.replace(new RegExp("σ$"), "ς");
+					}else {
+						conv_word = word;
+						conv_word = conv_word.replace(new RegExp("σ$"), "ς");
+						if (conv_word.match(/[άήέίόύώ]/)) {					// already toned word
+							if (delim && delim !== '/')
+								conv_word = orig_words[i]+delim;
+							words.push(conv_word);
+							if (i+ 1 !== orig_words.length)					// if not last word
+								words.push(' ');							// add space
+							continue;
+						} 
+					}
+					
+					if (conv_word.length === 0)		// unknown error
+						continue;
+
+					conv_word = conv_word.replace(new RegExp("σ$"), "ς"); 	// ending sigma
+					if (this.is_greek_upper(conv_word[0])) capital = true;
+
+					if (seen_words[conv_word] !== undefined || suggest_seen_words[conv_word] !== undefined)		// check if word is cached
+						if (suggest && suggest_seen_words[conv_word] !== undefined)
+							conv_word = suggest_seen_words[conv_word];
+						else
+							conv_word = seen_words[conv_word];
+					else		
+						conv_word = this.tone_word(conv_word, cached_list);
+
+					if (capital)
+						conv_word = conv_word[0].toUpperCase() + conv_word.substring(1, conv_word.length);
+					if (delim)
+						conv_word += delim;
+					
+					words.push(conv_word);
+					if (i+ 1 !== orig_words.length)					// if not last word
+						words.push(' ');							// add space
 				}
-				
-				if (conv_word.length === 0)				// unknown error
-					continue;
-
-				conv_word = conv_word.replace(new RegExp("σ$"), "ς"); 	// ending sigma
-				if (this.is_greek_upper(conv_word[0])) capital = true;
-
-				if (seen_words[conv_word] !== undefined || suggest_seen_words[conv_word] !== undefined)		// check if word is cached
-					if (suggest && suggest_seen_words[conv_word] !== undefined)
-						conv_word = suggest_seen_words[conv_word];
-					else
-						conv_word = seen_words[conv_word];
-				else		
-					conv_word = this.tone_word(conv_word, cached_list);
-
-				if (capital)
-					conv_word = conv_word[0].toUpperCase() + conv_word.substring(1, conv_word.length);
-				if (delim)
-					conv_word += delim;
-				
-				words.push(conv_word);
-				if (i+ 1 !== orig_words.length)					// if not last word
-					words.push(' ');							// add space
 			}
-		}
 
-		lines = words.join('');
-		if (auto_cap) {
-			lines = lines[0].toUpperCase() + lines.substring(1, lines.length);
-			lines = lines.replace(/[.!?;] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
-			lines = lines.replace(/[.!?;]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
-			lines = lines.replace(/([.!?,;])(?! )/gm, '$1 '); // canonicalize delimiters
-		}
+			lines = words.join('');
+			if (auto_cap) {
+				lines = lines[0].toUpperCase() + lines.substring(1, lines.length);
+				lines = lines.replace(/[.!?;] ?.{1}/gm, m => m.toUpperCase()); // rejoin lines, inline capitalize
+				lines = lines.replace(/[.!?;]\r.{1}/gm, m => m.toUpperCase()); // capitalize lines
+				lines = lines.replace(/([.!?,;])(?! )/gm, '$1 '); // canonicalize delimiters
+			}
 
-		lines = lines.trim();			// remove trailing \n
-		this.setState({
-			greek_text: lines,
-			isloading: false
-		});
-		
+			lines = lines.trim();			// remove trailing \n
+			this.setState({
+				greek_text: lines,
+				isLoading: false
+			});
+		})
 	}
 
 	get_backspace = (e) => {
@@ -449,6 +450,10 @@ export default class Fields extends Component {
 		});
 	}
 
+	set_button = e => {
+		e.target.textContent = 'Loading…';
+	}
+
 	set_live = e => {
 		const {live, cached_list} = this.state;
 
@@ -459,7 +464,7 @@ export default class Fields extends Component {
 					live: !live,
 					cached_list: res.data.split("\n"),
 					first_input: false,
-					isloading: false,
+					isLoading: false,
 				})
 			});
 		}else
@@ -497,13 +502,13 @@ export default class Fields extends Component {
 
 	componentDidMount() {
 		this.setState({
-			isloading: false
+			isLoading: false
 		});
 	}
 
 	render() {
 		const {
-			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isloading
+			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isLoading
 		} = this.state;
 
 		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
@@ -514,7 +519,7 @@ export default class Fields extends Component {
 		}
 		return (
 			<div>
-				{ isloading && <TopBarProgress />}
+				{ isLoading && <TopBarProgress />}
 				<div className="container">
 					<div className="row">
 						<div className="col-md-12">
@@ -614,8 +619,11 @@ export default class Fields extends Component {
 								</FormGroup>								
 								{ !live &&
 								 <Button
+								 	variant="primary"
+								 	disabled={isLoading}
+								 	onMouseDown={this.set_button}
 								 	onClick= {this.convertText}
-								  >Convert
+								  >{ isLoading ? 'Loading...' : 'Convert'}
 								 </Button> }
 							</div>
 							<div className="col-md-4" style={center_text}>
