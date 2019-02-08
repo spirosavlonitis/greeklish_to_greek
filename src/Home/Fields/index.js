@@ -355,7 +355,7 @@ export default class Fields extends Component {
 			suggest, only_tonoi, auto_cap
 		} = this.state;
 		
-		this.setState({ isLoading: true}, () =>{
+		this.setState({ isLoading: true}, () => {
 			const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
 			const orig_text = document.getElementById(textarea).value;
 			let lines = orig_text.split('\n');
@@ -459,22 +459,8 @@ export default class Fields extends Component {
 	}
 
 	set_live = e => {
-		const {live, cached_list} = this.state;
-
-		if (cached_list.length === 0) {
-			this.setState({loading: true});
-			axios.get(greek_words).then( res => {
-				this.setState({				
-					live: !live,
-					cached_list: res.data.split("\n"),
-					first_input: false,
-					isLoading: false,
-				})
-			});
-		}else
-			this.setState({
-				live: !live
-			});
+		const {live} = this.state;
+		this.setState({ live: !live });
 	}
 
 	set_auto_cap = e => {
@@ -505,8 +491,12 @@ export default class Fields extends Component {
 	}
 
 	componentDidMount() {
-		this.setState({
-			isLoading: false
+		axios.get(greek_words).then( res => {
+			this.setState({
+				cached_list: res.data.split("\n"),
+				first_input: false,
+				isLoading: false
+			})
 		});
 	}
 
