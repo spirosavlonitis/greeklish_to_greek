@@ -392,7 +392,7 @@ export default class Fields extends Component {
 						if (conv_word.match(/[άήέίόύώ]/)) {					// already toned word
 							if (delim && delim !== '/')
 								conv_word = orig_words[i]+delim;
-							words.push(conv_word);
+							words.push(orig_words[i]);
 							if (i+ 1 !== orig_words.length)					// if not last word
 								words.push(' ');							// add space
 							continue;
@@ -417,6 +417,9 @@ export default class Fields extends Component {
 						conv_word = conv_word[0].toUpperCase() + conv_word.substring(1, conv_word.length);
 					if (delim)
 						conv_word += delim;
+					
+					if (suggest && (auto_cap || capital))			// same case suggestions
+			 			conv_word = this.samecase_macthes(conv_word);
 					
 					words.push(conv_word);
 					if (i+ 1 !== orig_words.length)					// if not last word
@@ -451,6 +454,7 @@ export default class Fields extends Component {
 	}
 
 	set_button = e => {
+		e.target.className ='btn-danger btn btn-default';
 		e.target.textContent = 'Loading…';
 	}
 
@@ -619,7 +623,7 @@ export default class Fields extends Component {
 								</FormGroup>								
 								{ !live &&
 								 <Button
-								 	variant="primary"
+								 	className={ isLoading ? 'btn-danger' : 'btn-primary'}
 								 	disabled={isLoading}
 								 	onMouseDown={this.set_button}
 								 	onClick= {this.convertText}
