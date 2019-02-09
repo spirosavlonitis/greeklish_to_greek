@@ -354,7 +354,12 @@ export default class Fields extends Component {
 
 
 	convertSubs(e) {
-
+		const subs = document.getElementById('formControlsGreeklishTextarea').value;
+		try{
+			document.getElementById('formControlsGreekTextarea').value = iconv.decode(subs, "ISO-8859-7");
+		}catch (error){
+			document.getElementById('formControlsGreekTextarea').value = "Error could not decode text";
+		}
 	}
 
 
@@ -543,7 +548,7 @@ export default class Fields extends Component {
 									onKeyPress= { live ? this.convert_char : undefined}
 									onKeyDown={this.get_backspace}
 								>
-	      							<ControlLabel>{ subtitles ? 'In Subtitles' : 'Greeklish'}</ControlLabel>
+	      							<ControlLabel>{ subtitles ? 'Subtitles To Convert' : 'Greeklish'}</ControlLabel>
 	      							{ only_tonoi === false &&
 		      							<FormControl 
 		      								componentClass="textarea"
@@ -658,14 +663,13 @@ export default class Fields extends Component {
 								 <Button
 								 	className={ isLoading ? 'btn-danger' : 'btn-primary'}
 								 	disabled={isLoading}
-								 	onMouseDown={this.set_button}
 								 	onClick= {this.convertSubs}
-								  >{ isLoading ? 'Loading...' : 'Convert'}
+								  >Convert
 								 </Button> }								 
 							</div>
 							<div className="col-md-4" style={center_text}>
 								<FormGroup controlId="formControlsGreekTextarea">
-	      							<ControlLabel>Greek</ControlLabel>
+	      							<ControlLabel>{ subtitles ? 'Conveted Subtitles' : 'Greek'}</ControlLabel>
 	      							<FormControl 
 	      							 componentClass="textarea"
 	      							 placeholder=""	      							 
