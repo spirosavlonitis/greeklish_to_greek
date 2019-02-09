@@ -28,8 +28,7 @@ export default class Fields extends Component {
 
 		this.state = {
 			isLoading: true,
-			first_input: true,
-			cached_list: [],
+			word_list: [],
 			seen_words: cached_mathes,
 			suggest_seen_words: suggest_cached_words,
 			raw_input: false,
@@ -93,8 +92,8 @@ export default class Fields extends Component {
     	return lines;
 	}
 
-	tone_word(word, word_list, retry=false) {
-		const {seen_words, suggest, only_tonoi, suggest_seen_words} = this.state;
+	tone_word(word, retry=false) {
+		const {word_list , seen_words, suggest, only_tonoi, suggest_seen_words} = this.state;
 
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
 		const lower_chars = [
@@ -144,23 +143,23 @@ export default class Fields extends Component {
 
 		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false){   // word was not a capital word
 		 	if (word.match(/(Τ|τ)ηρ/) && only_tonoi === false){
-		 		best_match.push(this.tone_word(word.replace(/(Τ|τ)ηρ/, 'θρ').toLowerCase(), word_list, true));
-		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+		 		best_match.push(this.tone_word(word.replace(/(Τ|τ)ηρ/, 'θρ').toLowerCase(), true));
+		 		best_match.push(this.tone_word(word.toLowerCase(), true));
 			 	if (suggest === false)
 			 		return best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
 		 	}else if(word.match(/(Θ|θ)ρ/) && only_tonoi === false){
-		 		best_match.push(this.tone_word(word.replace(/(Θ|θ)ρ/, 'τηρ').toLowerCase(), word_list, true));
-		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+		 		best_match.push(this.tone_word(word.replace(/(Θ|θ)ρ/, 'τηρ').toLowerCase(), true));
+		 		best_match.push(this.tone_word(word.toLowerCase(), true));
 			 	if (suggest === false)
 			 		return best_match.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
 		 	}else
-		 		best_match.push(this.tone_word(word.toLowerCase(), word_list, true));
+		 		best_match.push(this.tone_word(word.toLowerCase(), true));
 
 		 	best_match = best_match.flat();		// flatten two dimention array created from array returned
 		 	if (suggest === false)
 		 		return best_match[0];
 		}else if (best_match.length === 0 && retry === false && word.match(/θρ/) && only_tonoi === false){  // maybe τηρ 
-			best_match.push(this.tone_word(word.replace(/θρ/, 'τηρ'), word_list, true));
+			best_match.push(this.tone_word(word.replace(/θρ/, 'τηρ'), true));
 		 	best_match = best_match.flat();
 		 	if (suggest === false)
 		 		return best_match[0];		
@@ -179,14 +178,11 @@ export default class Fields extends Component {
 		}
 	}
 
-	convert(c, word_list=[]) {
+	convert(c) {
 		const {
 			greek_text, seen_words, suggest, only_tonoi, auto_cap,
-			suggest_seen_words, first_input, cached_list 
+			suggest_seen_words 
 		} = this.state;
-
-		if (word_list.length === 0)
-			word_list = cached_list
 		
 		let lines_array = greek_text.split( only_tonoi ? '\n' : '\r');	// split text into lines
 		if (only_tonoi && auto_cap)
@@ -219,7 +215,7 @@ export default class Fields extends Component {
 			else
 				word = seen_words[word];
 		else 
-			word = this.tone_word(word, word_list);
+			word = this.tone_word(word);
 		
 		if (capital_word)
 			word = word[0].toUpperCase() + word.substring(1, word.length);
@@ -241,33 +237,7 @@ export default class Fields extends Component {
 		if (suggest && (auto_cap || capital_word))
 			 lines = this.samecase_macthes(lines);
 
-		if (first_input)			// use the loading bar for the first conversion
-			this.setState({		
-				first_input: false,
-				isLoading: false,
-				cached_list: word_list,
-				greek_text: lines+c
-			});
-		else
-			this.setState({		
-				greek_text: lines+c,
-			});
-	}
-
-	handle_non_apla(c) {
-		const {first_input, cached_list } = this.state;
-		
-		if (first_input)
-			this.setState({
-				isLoading:true
-			})
-
-		if (cached_list.length === 0)
-			axios.get(greek_words).then(res => {
-				this.convert(c, res.data.split('\n'))
-			})
-		else
-			this.convert(c, cached_list)
+		this.setState({	greek_text: lines+c,});
 	}
 
 	convert_char(e, static_c="") {
@@ -279,25 +249,24 @@ export default class Fields extends Component {
 	        "g": "γ", "h": "η", "i": "ι", "j": "ξ", "k": "κ", "l": "λ",
 	        "m": "μ", "n": "ν", "o": "ο", "p": "π", "q": "ς", "r": "ρ",
 	        "s": "σ", "t": "τ", "u": "υ", "v": "β", "w": "ω", "x": "χ",
-	        "y": "υ","z": "ζ"
+	        "y": "υ", "z": "ζ"
 	    };
-		if (static_c.length === 0){
+
+		if (static_c.length === 0){				// character from live text
 			if (e.KeyCode)
 			 	c = String.fromCharCode(e.KeyCode);
 			else if (e.which)
 				c = String.fromCharCode(e.which);
 		}else
-			c = static_c
+			c = static_c;
 
 		if (raw_input) {
-			this.setState({
-				greek_text: greek_text+c
-			})
+			this.setState({	greek_text: greek_text+c})
 			return
 		}
 
 		if (this.isalpha(c) === false && static_c.length === 0) {			// tone word if space
-			this.handle_non_apla(c);
+			this.convert(c);
 			return
 		}
 
@@ -314,44 +283,31 @@ export default class Fields extends Component {
 			new_text = greek_text.replace(/([.,?!;])([^ ])/, '$1 $2'); // canonicalize symbols
 		else
 			new_text = greek_text;
+		
 		this.setState({
 			greek_text: this.handle_special(new_text+c),
 		});
 	}
 
 	greek_text_change(e) {
-		const {only_tonoi, live, cached_list, first_input, greek_text} = this.state;
+		const {only_tonoi, live, greek_text} = this.state;
 		const backcpase = greek_text.length > e.target.value.length;
 		const paste = e.target.value.length-greek_text.length > 1;
 
-		if (only_tonoi === false || backcpase || paste || live === false){		// check of user is deleting a char
-			this.setState({
+		if (only_tonoi === false || backcpase || paste || live === false){
+			this.setState({					
 				greek_text: e.target.value
 			})
 			return;
 		}
-
 		const c = e.target.value[e.target.value.length-1];
 		if (this.is_greek_alpha(c)) {
-			this.setState({
-				greek_text: e.target.value
-			})
+			this.setState({	greek_text: e.target.value })
 			return;
 		}
 
-		if (first_input)
-			this.setState({
-				isLoading:true
-			})
-
-		if (cached_list.length === 0)
-			axios.get(greek_words).then(res => {
-				this.convert(c, res.data.split('\n'))
-			})
-		else
-			this.convert(c, cached_list)
+		this.convert(c)
 	}
-
 
 	convertSubs(e) {
 		const subs = document.getElementById('formControlsGreeklishTextarea').value;
@@ -362,12 +318,8 @@ export default class Fields extends Component {
 		}
 	}
 
-
 	convertText(e) {
-		const {
-			cached_list, seen_words, suggest_seen_words,
-			suggest, only_tonoi, auto_cap
-		} = this.state;
+		const { seen_words, suggest_seen_words,	suggest, only_tonoi, auto_cap } = this.state;
 		
 		this.setState({ isLoading: true}, () => {
 			const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
@@ -425,7 +377,7 @@ export default class Fields extends Component {
 						else
 							conv_word = seen_words[conv_word];
 					else		
-						conv_word = this.tone_word(conv_word, cached_list);
+						conv_word = this.tone_word(conv_word);
 
 					if (capital)
 						conv_word = conv_word[0].toUpperCase() + conv_word.substring(1, conv_word.length);
@@ -476,10 +428,9 @@ export default class Fields extends Component {
 		const {subtitles, live} = this.state;
 		this.setState({ 
 			subtitles: !subtitles,
-			live: !live
+			live: !live,
 		});
 	}
-
 
 	set_live = e => {
 		const {live} = this.state;
@@ -516,8 +467,7 @@ export default class Fields extends Component {
 	componentDidMount() {
 		axios.get(greek_words).then( res => {
 			this.setState({
-				cached_list: res.data.split("\n"),
-				first_input: false,
+				word_list: res.data.split("\n"),
 				isLoading: false
 			})
 		});
@@ -588,7 +538,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup  >
+								<FormGroup >
 									<ControlLabel className="switchLabel" >Only Tonoi</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
