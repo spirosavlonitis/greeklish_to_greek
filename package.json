@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
+    "iconv-lite": "^0.4.24",
     "react": "^16.7.0",
     "react-bootstrap": "^0.32.4",
     "react-cookie-consent": "^2.0.1",

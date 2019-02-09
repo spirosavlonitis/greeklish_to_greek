@@ -6,6 +6,7 @@ import FormControl from 'react-bootstrap/lib/FormControl';
 import Panel from 'react-bootstrap/lib/Panel';
 import Button from 'react-bootstrap/lib/Button';
 import axios from 'axios';
+import iconv from 'iconv-lite';
 import greek_words from './Greek.dic';
 import cached_mathes from './seen_words';
 import suggest_cached_words from './seen_words_suggest_trimmed';
@@ -36,12 +37,14 @@ export default class Fields extends Component {
 			only_tonoi: false,
 			auto_cap: true,
 			live: true,
-			greek_text: ""
+			greek_text: "",
+			subtitles: false
 		};
 
 		this.convert_char = this.convert_char.bind(this);
 		this.greek_text_change = this.greek_text_change.bind(this);
 		this.convertText = this.convertText.bind(this);
+		this.convertSubs = this.convertSubs.bind(this);
 	}
 
 	isupper = (c) =>
@@ -349,6 +352,12 @@ export default class Fields extends Component {
 			this.convert(c, cached_list)
 	}
 
+
+	convertSubs(e) {
+
+	}
+
+
 	convertText(e) {
 		const {
 			cached_list, seen_words, suggest_seen_words,
@@ -458,6 +467,15 @@ export default class Fields extends Component {
 		e.target.textContent = 'Loading…';
 	}
 
+	set_subs = e => {
+		const {subtitles, live} = this.state;
+		this.setState({ 
+			subtitles: !subtitles,
+			live: !live
+		});
+	}
+
+
 	set_live = e => {
 		const {live} = this.state;
 		this.setState({ live: !live });
@@ -502,10 +520,12 @@ export default class Fields extends Component {
 
 	render() {
 		const {
-			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isLoading
+			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isLoading, subtitles
 		} = this.state;
 
 		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
+		const liveVisibility = { visibility: subtitles ? 'hidden' : 'visible' }
+		
 		const center_text = {
 			  margin: 'auto',
 			  padding: '10px',
@@ -523,7 +543,7 @@ export default class Fields extends Component {
 									onKeyPress= { live ? this.convert_char : undefined}
 									onKeyDown={this.get_backspace}
 								>
-	      							<ControlLabel>Greeklish</ControlLabel>
+	      							<ControlLabel>{ subtitles ? 'In Subtitles' : 'Greeklish'}</ControlLabel>
 	      							{ only_tonoi === false &&
 		      							<FormControl 
 		      								componentClass="textarea"
@@ -563,7 +583,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup >
+								<FormGroup  >
 									<ControlLabel className="switchLabel" >Only Tonoi</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -593,7 +613,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup >
+								<FormGroup style={liveVisibility} >
 									<ControlLabel className="switchLabel" >Live</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -611,7 +631,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>								
-								{ !live &&
+								{ !live && !subtitles &&
 								 <Button
 								 	className={ isLoading ? 'btn-danger' : 'btn-primary'}
 								 	disabled={isLoading}
@@ -619,6 +639,29 @@ export default class Fields extends Component {
 								 	onClick= {this.convertText}
 								  >{ isLoading ? 'Loading...' : 'Convert'}
 								 </Button> }
+								<FormGroup >
+									<ControlLabel className="switchLabel" >Subtitles</ControlLabel>
+									<label className="switch">
+									  <input type="checkbox" />
+									</label>
+									<b className="switchText" >OFF</b>
+									<label className="switch">
+									  <input type="checkbox" 
+										onClick={this.set_subs}
+										defaultChecked={subtitles}
+									   />
+									  <span className="slider round"></span>
+									</label>
+									<b className="switchText" >ON</b>
+								</FormGroup>								
+								{ subtitles &&
+								 <Button
+								 	className={ isLoading ? 'btn-danger' : 'btn-primary'}
+								 	disabled={isLoading}
+								 	onMouseDown={this.set_button}
+								 	onClick= {this.convertSubs}
+								  >{ isLoading ? 'Loading...' : 'Convert'}
+								 </Button> }								 
 							</div>
 							<div className="col-md-4" style={center_text}>
 								<FormGroup controlId="formControlsGreekTextarea">
