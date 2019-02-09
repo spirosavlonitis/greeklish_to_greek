@@ -457,6 +457,7 @@ export default class Fields extends Component {
 			suggest: !suggest
 		})
 	}
+	
 	set_input = e => {
 		const {raw_input} = this.state;
 		this.setState({
