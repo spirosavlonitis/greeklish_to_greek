@@ -479,8 +479,9 @@ export default class Fields extends Component {
 			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isLoading, subtitles
 		} = this.state;
 
-		const set_visibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
-		const liveVisibility = { visibility: subtitles ? 'hidden' : 'visible' }
+		const tonoiVisibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
+		const subsVisibility = { visibility: subtitles ? 'hidden' : 'visible' }
+		const rawVisibility = { visibility: only_tonoi || subtitles ?  'hidden' : 'visible' }
 		
 		const center_text = {
 			  margin: 'auto',
@@ -493,7 +494,7 @@ export default class Fields extends Component {
 				<div className="container">
 					<div className="row">
 						<div className="col-md-12">
-							<div className="col-md-4" style={set_visibility}>
+							<div className="col-md-4" style={tonoiVisibility}>
 								<FormGroup 
 									controlId="formControlsGreeklishTextarea"
 									onKeyPress= { live ? this.convert_char : undefined}
@@ -509,7 +510,7 @@ export default class Fields extends Component {
 								</FormGroup>
 							</div>
 							<div className="col-md-4" align="center">
-								<FormGroup style={set_visibility} >
+								<FormGroup style={rawVisibility} >
 									<ControlLabel className="switchLabel" >Raw Input &nbsp;</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -524,7 +525,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup >
+								<FormGroup style={subsVisibility} >
 									<ControlLabel className="switchLabel" >Suggestions</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -539,7 +540,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup >
+								<FormGroup style={subsVisibility} >
 									<ControlLabel className="switchLabel" >Only Tonoi</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -554,7 +555,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup >
+								<FormGroup style={subsVisibility} >
 									<ControlLabel className="switchLabel" >Auto Caps</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -569,7 +570,7 @@ export default class Fields extends Component {
 									</label>
 									<b className="switchText" >ON</b>
 								</FormGroup>
-								<FormGroup style={liveVisibility} >
+								<FormGroup style={subsVisibility} >
 									<ControlLabel className="switchLabel" >Live</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -595,7 +596,7 @@ export default class Fields extends Component {
 								 	onClick= {this.convertText}
 								  >{ isLoading ? 'Loading...' : 'Convert'}
 								 </Button> }
-								<FormGroup >
+								<FormGroup style={tonoiVisibility} >
 									<ControlLabel className="switchLabel" >Subtitles</ControlLabel>
 									<label className="switch">
 									  <input type="checkbox" />
@@ -631,7 +632,7 @@ export default class Fields extends Component {
 							</div>
 						</div>
 					</div>
-			        <Panel id="collapsible-panel-example-2" style={set_visibility}>
+			        <Panel id="collapsible-panel-example-2" style={tonoiVisibility}>
 			          <Panel.Heading >
 			            <Panel.Title toggle>
 			             Οδηγίες Χρήσης
@@ -653,7 +654,7 @@ export default class Fields extends Component {
 			            </Panel.Body>
 			          </Panel.Collapse>
 			        </Panel>
-			        <Panel id="collapsible-panel-example-3" style={set_visibility}>
+			        <Panel id="collapsible-panel-example-3" style={tonoiVisibility}>
 			          <Panel.Heading >
 			            <Panel.Title toggle>
 			             Greeklish Αλφάβητο
