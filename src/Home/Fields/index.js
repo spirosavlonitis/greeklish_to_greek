@@ -313,6 +313,17 @@ export default class Fields extends Component {
 		const subs = document.getElementById('formControlsGreeklishTextarea').value;
 		try{
 			document.getElementById('formControlsGreekTextarea').value = iconv.decode(subs, "ISO-8859-7");
+
+			const filename = (window.prompt("Please enter the movie's name") || new Date().getTime()) + '_Greek.srt';
+			const blob = new Blob([iconv.decode(subs, "ISO-8859-7")], {type: 'tesx/srt'});
+			
+			const elem = window.document.createElement('a');
+			elem.download = filename;
+			elem.href = window.URL.createObjectURL(blob);
+			document.body.appendChild(elem);
+            elem.click();
+            document.body.removeChild(elem);
+
 		}catch (error){
 			document.getElementById('formControlsGreekTextarea').value = "Error could not decode text";
 		}
