@@ -312,10 +312,11 @@ export default class Fields extends Component {
 	convertSubs(e) {
 		const subs = document.getElementById('formControlsGreeklishTextarea').value;
 		try{
-			document.getElementById('formControlsGreekTextarea').value = iconv.decode(subs, "ISO-8859-7");
+			const converted_subs = iconv.decode(subs, "ISO-8859-7");
+			document.getElementById('formControlsGreekTextarea').value = converted_subs;
 
 			const filename = (window.prompt("Please enter the movie's name") || new Date().getTime()) + '_Greek.srt';
-			const blob = new Blob([iconv.decode(subs, "ISO-8859-7")], {type: 'tesx/srt'});
+			const blob = new Blob([converted_subs], {type: 'tesx/srt'});
 			
 			const elem = window.document.createElement('a');
 			elem.download = filename;
@@ -325,6 +326,7 @@ export default class Fields extends Component {
             document.body.removeChild(elem);
 
 		}catch (error){
+			console.log(error)
 			document.getElementById('formControlsGreekTextarea').value = "Error could not decode text";
 		}
 	}
@@ -627,13 +629,13 @@ export default class Fields extends Component {
 								 	className={ isLoading ? 'btn-danger' : 'btn-primary'}
 								 	disabled={isLoading}
 								 	onClick= {this.convertSubs}
-								  >Convert
+								  >Download
 								 </Button> }								 
 							</div>
 							<div className="col-md-4" style={center_text}>
 								<FormGroup controlId="formControlsGreekTextarea">
-	      							<ControlLabel>{ subtitles ? 'Conveted Subtitles' : 'Greek'}</ControlLabel>
-	      							<FormControl 
+	      							<ControlLabel>{ subtitles ? 'Conveted Subtitles Preview' : 'Greek'}</ControlLabel>
+	      							<FormControl
 	      							 componentClass="textarea"
 	      							 placeholder=""	      							 
 	      							 value={greek_text}
