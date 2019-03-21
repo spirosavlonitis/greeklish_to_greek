@@ -59,14 +59,16 @@ export default class Fields extends Component {
 		( (c >= 'Α' && c <= 'Ω') || (c >= 'α' && c <= 'ω'));
 
 	handle_special(temp_text) {
-		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'ψ'.toUpperCase()+'$1')
-						.replace(/Τη([αεηιοωυ])/g, 'θ'.toUpperCase()+'$1')
-						.replace(/Κσ([αεηιοωυ])/g, 'ξ'.toUpperCase()+'$1')
+		return temp_text.replace(/Πσ([αεηιοωυ])/g, 'Ψ$1')
+						.replace(/Τη([αεηιοωυ])/g, 'Θ$1')
+						.replace(/Κσ([αεηιοωυ])/g, 'Ξ$1')
+						.replace(/Ετην([αεηιοωυ])/g, 'Εθν$1')	// εθν
 						.replace(/πσ([αεηιοωυ])/g, 'ψ$1')
 						.replace(/τη([αεηιοωυρ])/g, 'θ$1')
-						.replace(/8([αεηιοωυρ])/g, 'θ$1')
+						.replace(/8([αεηιοωυρν])/g, 'θ$1')
 						.replace(/κσ([αεηιοωυ])/g, 'ξ$1')
 						.replace(/βατημ([αεηιοωυ])/g, 'βαθμ$1') // βαθμ
+						.replace(/ετην([αεηιοωυ])/g, 'εθν$1')	// εθν
 	}
 
 	samecase_macthes(lines) {
