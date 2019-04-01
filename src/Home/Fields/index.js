@@ -40,6 +40,14 @@ export default class Fields extends Component {
 			subtitles: false
 		};
 
+		this.lower_chars = [
+	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
+	        	"ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
+	        	"ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
+    	];
+
+    	this.upper_chars = this.lower_chars.map( char => char.toUpperCase() );
+
 		this.convert_char = this.convert_char.bind(this);
 		this.greek_text_change = this.greek_text_change.bind(this);
 		this.convertText = this.convertText.bind(this);
@@ -72,17 +80,11 @@ export default class Fields extends Component {
 	}
 
 	samecase_macthes(lines) {
-		const lower_chars = [
-	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
-	        	"ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
-	        	"ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
-    		];
-
     	lines = lines.split('\r');					// split into line array
 		let line = lines[lines.length-1].split(' ');	// last line array
 		let word = line[line.length-1];					// last word of last line
     													/* for raw input */
-    	if (lower_chars.includes(word[0]) === false && this.isalpha(word[0]) === false) {
+    	if (this.lower_chars.includes(word[0]) === false && this.isalpha(word[0]) === false) {
     		word = word.split('/');
     		word = word.map(s => s[0].toUpperCase() + s.substring(1)).join('/');
     	}
@@ -98,11 +100,7 @@ export default class Fields extends Component {
 		const {word_list , seen_words, suggest, only_tonoi, suggest_seen_words} = this.state;
 
      	const toned_chars = { "ά": "α", "ή": "η", "έ": "ε", "ί": "ι", "ό": "ο", "ύ": "υ", "ώ": "ω" };
-		const lower_chars = [
-	      	  "α", "β", "γ", "δ", "ε", "ζ", "η", "θ", "ι", "κ", "λ", "μ",
-	        	"ν", "ξ", "ο", "π", "ρ", "σ", "τ", "υ", "φ", "χ", "ψ",  "ω",
-	        	"ά", "ή" ,"έ", "ί", "ό", "ύ", "ώ"
-    		];
+
 		let best_match = [];
 		let dic_word = "";
 		let dif_letters = "";
@@ -116,11 +114,16 @@ export default class Fields extends Component {
 					|| toned_chars[dic_word[0].toLowerCase()] !== word[0].toLowerCase())	// not the same vowel
 				)
 				continue;
-			
-			if ( Object.values(toned_chars).includes(word[0].toLowerCase()) === false 	// not a vowel
-				&& Object.keys(toned_chars).includes(dic_word[0].toLowerCase()) === false // not a toned vowel
-				&& dic_word.charCodeAt(0) > word.charCodeAt(0))
-				break;
+
+			try {				// unknown error
+				if ( Object.values(toned_chars).includes(word[0].toLowerCase()) === false 	// not a vowel
+					&& Object.keys(toned_chars).includes(dic_word[0].toLowerCase()) === false // not a toned vowel
+					&& dic_word.charCodeAt(0) > word.charCodeAt(0))
+					break;			
+			}catch(e) {
+				console.log(e);
+				return word;
+			}
 			
 			if (dic_word.length !== word.length)			// unequal words
 				continue;
@@ -143,7 +146,7 @@ export default class Fields extends Component {
 			}
 		}
 
-		if (best_match.length === 0 && retry === false && lower_chars.includes(word[0]) === false){   // word was not a capital word
+		if (best_match.length === 0 && retry === false && this.lower_chars.includes(word[0]) === false){   // word was not a capital word
 		 	if (word.match(/(Τ|τ)ηρ/) && only_tonoi === false){
 		 		best_match.push(this.tone_word(word.replace(/(Τ|τ)ηρ/, 'θρ').toLowerCase(), true));
 		 		best_match.push(this.tone_word(word.toLowerCase(), true));
@@ -216,8 +219,18 @@ export default class Fields extends Component {
 				word = suggest_seen_words[word];
 			else
 				word = seen_words[word];
-		else 
-			word = this.tone_word(word);
+		else {
+
+			let cap_word = true;
+			for (let i = 0; i < word.length; i++)
+				if (this.upper_chars.includes(word[i]) === false && symbols.includes(word[i]) === false)
+					cap_word = false;
+
+			if(auto_cap && cap_word === false)
+				word = this.tone_word(word);
+			else if (cap_word === false)
+				word = this.tone_word(word);
+		}
 		
 		if (capital_word)
 			word = word[0].toUpperCase() + word.substring(1, word.length);
