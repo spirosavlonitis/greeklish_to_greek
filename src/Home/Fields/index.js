@@ -225,10 +225,7 @@ export default class Fields extends Component {
 			for (let i = 0; i < word.length; i++)
 				if (this.upper_chars.includes(word[i]) === false && symbols.includes(word[i]) === false)
 					cap_word = false;
-
-			if(auto_cap && cap_word === false)
-				word = this.tone_word(word);
-			else if (cap_word === false)
+			if (cap_word === false)
 				word = this.tone_word(word);
 		}
 		
