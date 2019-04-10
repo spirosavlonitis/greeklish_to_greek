@@ -482,6 +482,17 @@ export default class Fields extends Component {
 			suggest: !suggest
 		})
 	}
+
+	copyToClipboard = () => {
+	    const {greek_text} = this.state;
+	    const temp = document.createElement("input");
+	    document.body.appendChild(temp);
+	    temp.value = greek_text
+	    //dummy.setAttribute('value', greek_text);
+	    temp.select();
+	    document.execCommand("copy");
+	    document.body.removeChild(temp);
+	}
 	
 	set_input = e => {
 		const {raw_input} = this.state;
@@ -654,6 +665,12 @@ export default class Fields extends Component {
 	      							 onChange={this.greek_text_change}
 	      							/>
 								</FormGroup>
+								<Button 
+									className='btn-primary' 
+									disabled={greek_text.length === 0}
+									onClick={this.copyToClipboard}
+								>Copy
+								</Button>
 							</div>
 						</div>
 					</div>
