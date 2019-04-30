@@ -37,6 +37,7 @@ export default class Fields extends Component {
 			auto_cap: true,
 			live: true,
 			greek_text: "",
+			greeklish_text: "",
 			subtitles: false
 		};
 
@@ -501,6 +502,19 @@ export default class Fields extends Component {
 		})
 	}
 
+	clear = e => {
+		this.setState({
+			greek_text: "",
+			greeklish_text: ""
+		});
+	}
+
+	setGreeklishValue = e => {
+		this.setState({
+			greeklish_text: e.target.value
+		})
+	}
+
 	componentDidMount() {
 		axios.get(greek_words).then( res => {
 			this.setState({
@@ -512,7 +526,8 @@ export default class Fields extends Component {
 
 	render() {
 		const {
-			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isLoading, subtitles
+			greek_text, raw_input, suggest, only_tonoi, auto_cap, live, isLoading, subtitles,
+			greeklish_text
 		} = this.state;
 
 		const tonoiVisibility = { visibility: only_tonoi ? 'hidden' : 'visible' }
@@ -540,10 +555,19 @@ export default class Fields extends Component {
 	      							{ only_tonoi === false &&
 		      							<FormControl 
 		      								componentClass="textarea"
-		      								placeholder="" 
+		      								placeholder=""
+		      								value ={greeklish_text}
+		      								onChange={this.setGreeklishValue}
 		      							/>
 	      							}
 								</FormGroup>
+								<Button 
+									className = "btn btn-danger"
+									disabled = {greek_text.length === 0}
+									onClick = {this.clear}
+								>Clear
+								</Button>
+
 							</div>
 							<div className="col-md-4" align="center">
 								<FormGroup style={rawVisibility} >
