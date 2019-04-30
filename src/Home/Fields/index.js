@@ -345,11 +345,14 @@ export default class Fields extends Component {
 	}
 
 	convertText(e) {
-		const { seen_words, suggest_seen_words,	suggest, only_tonoi, auto_cap } = this.state;
+		const { 
+			seen_words, suggest_seen_words,	suggest, only_tonoi, auto_cap ,
+			greek_text, greeklish_text
+		} = this.state;
 		
 		this.setState({ isLoading: true}, () => {
-			const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
-			const orig_text = document.getElementById(textarea).value;
+//			const textarea = only_tonoi ? 'formControlsGreekTextarea' : 'formControlsGreeklishTextarea'
+			const orig_text = only_tonoi ? greek_text : greeklish_text //document.getElementById(textarea).value;
 			let lines = orig_text.split('\n');
 
 			const words = []
@@ -567,7 +570,6 @@ export default class Fields extends Component {
 									onClick = {this.clear}
 								>Clear
 								</Button>
-
 							</div>
 							<div className="col-md-4" align="center">
 								<FormGroup style={rawVisibility} >
